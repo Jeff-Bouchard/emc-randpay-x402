@@ -430,6 +430,12 @@ footer a:hover{color:var(--teal)}
           <div id="pgDesc" class="pg-desc"></div>
           <div id="pgFields"></div>
 
+          <!-- BASE URL CONFIG -->
+          <div style="margin:14px 0 8px">
+            <div style="font-size:11px;color:var(--text);font-weight:500;margin-bottom:4px">x402 Server URL</div>
+            <input type="text" id="baseUrl" placeholder="http://localhost:54321" value="http://localhost:54321" style="width:100%;padding:8px 10px;background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:11px;border-radius:2px">
+          </div>
+
           <!-- LIVE / SIM TOGGLE -->
           <label style="display:flex;align-items:flex-start;gap:8px;margin:14px 0 0;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);cursor:pointer;border-radius:2px">
             <input type="checkbox" id="liveMode" style="margin-top:2px;accent-color:var(--teal);cursor:pointer">
@@ -837,7 +843,11 @@ function pickRisk(btn){
 
 function getRisk(){
   const el=document.getElementById('p_risk');
-  return el?parseFloat(el.value):PLANS[plan].risk;
+  if(el && el.value){
+    return parseFloat(el.value);
+  }
+  // Fallback if element doesn't exist or has no value
+  return PLANS[plan]?PLANS[plan].risk:0.1;
 }
 
 // ── CONSOLE ENGINE ──────────────────────────────────────────────
@@ -909,8 +919,10 @@ async function execute(){
   await sleep(280+Math.random()*250);
   const p=PLANS[plan];
   const t=rnd(180);
-  const live=document.getElementById('liveMode').checked;
-  const baseUrl=document.getElementById('baseUrl').value.replace(/\/$/,'');
+  const liveModeEl=document.getElementById('liveMode');
+  const live=liveModeEl?liveModeEl.checked:false;
+  const baseUrlEl=document.getElementById('baseUrl');
+  const baseUrl=baseUrlEl?baseUrlEl.value.replace(/\/$/,''):'http://localhost:54321';
 
   try{
     if(k==='mkchap'){
@@ -1027,12 +1039,18 @@ async function tryFetch(url, opts={}, timeoutMs=1500){
 async function runFullRound(){
   const btn=document.getElementById('wizBtn');
   const execBtn=document.getElementById('execBtn');
+  if(!btn || !execBtn){
+    console.error('Required buttons not found');
+    return;
+  }
   btn.disabled=true; execBtn.disabled=true;
   btn.textContent='running…';
 
   const p=PLANS[plan];
-  const baseUrl=document.getElementById('baseUrl').value.replace(/\/$/,'');
-  const live=document.getElementById('liveMode').checked;
+  const baseUrlEl=document.getElementById('baseUrl');
+  const baseUrl=baseUrlEl?baseUrlEl.value.replace(/\/$/,''):'http://localhost:54321';
+  const liveModeEl=document.getElementById('liveMode');
+  const live=liveModeEl?liveModeEl.checked:false;
   const risk=getRisk();
   const expected=Math.round(1/risk*10)/10;
 
@@ -1163,9 +1181,14 @@ async function runFullRound(){
 }
 
 
-// update stat
-document.getElementById('statTx').textContent=Math.round(PLANS[plan].risk*100)+'%';
-resetSequence();
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function(){
+  // Update stat
+  document.getElementById('statTx').textContent=Math.round(PLANS[plan].risk*100)+'%';
+  // Initialize the first command
+  selectCmd('mkchap');
+  resetSequence();
+});
 
 // nav active on scroll
 const sections=document.querySelectorAll('section[id]');
