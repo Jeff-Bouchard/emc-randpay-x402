@@ -1,5 +1,5 @@
 {
   "dependencies": {
-    "server": "^1.0.42"
+    "server": "^0.0.3"
   }
 }

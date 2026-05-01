@@ -69,8 +69,8 @@ const PLANS = {
   '7d': {
     label:   '7-day',
     days:    7,
-    amount:  parseFloat(process.env.PRICE_7D  || '0.05000000'),
-    risk:    parseFloat(process.env.RISK_7D   || '0.10'),
+    amount:  parseFloat(process.env.PRICE_7D  || '0.5000000'),
+    risk:    parseFloat(process.env.RISK_7D   || '0.03'),
     timeout: parseInt(process.env.TIMEOUT_7D  || '300'),
     ttl_ms:  7 * 24 * 60 * 60 * 1000,
   },
@@ -78,7 +78,7 @@ const PLANS = {
     label:   '30-day',
     days:    30,
     amount:  parseFloat(process.env.PRICE_30D || '0.15000000'),
-    risk:    parseFloat(process.env.RISK_30D  || '0.03'),
+    risk:    parseFloat(process.env.RISK_30D  || '0.01'),
     timeout: parseInt(process.env.TIMEOUT_30D || '300'),
     ttl_ms:  30 * 24 * 60 * 60 * 1000,
   },
@@ -200,6 +200,8 @@ function x402(options = {}) {
 
 const app = express();
 app.use(express.json());
+// Serve static frontend files
+app.use(express.static('../ui'));
 
 // All /api/* routes — x402 middleware gates entry
 app.use('/api', x402());

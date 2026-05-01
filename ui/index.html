@@ -381,11 +381,12 @@ footer a:hover{color:var(--teal)}
       <div class="console-body" id="consoleBody" style="height:calc(100vh - 220px);min-height:380px;max-height:560px">
         <div class="console-empty" id="consoleEmpty">awaiting execution — follow the tutorial on the right</div>
       </div>
-      <div class="console-stats-bar" style="display:grid;grid-template-columns:1fr 1fr;gap:1px">
+      <div class="console-stats-bar" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:1px">
         <div class="cstat"><span class="cstat-val teal" id="csTotal">0</span> rounds</div>
         <div class="cstat"><span class="cstat-val teal" id="csWins">0</span> wins</div>
         <div class="cstat"><span class="cstat-val amber" id="csLosses">0</span> non-winners</div>
         <div class="cstat"><span class="cstat-val" id="csWinRate">—</span> win rate</div>
+        <div class="cstat"><span class="cstat-val" id="csAvgMs">—</span> avg ms</div>
       </div>
     </div>
 
@@ -433,7 +434,7 @@ footer a:hover{color:var(--teal)}
           <!-- BASE URL CONFIG -->
           <div style="margin:14px 0 8px">
             <div style="font-size:11px;color:var(--text);font-weight:500;margin-bottom:4px">x402 Server URL</div>
-            <input type="text" id="baseUrl" placeholder="http://localhost:54321" value="http://localhost:54321" style="width:100%;padding:8px 10px;background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:11px;border-radius:2px">
+            <input type="text" id="baseUrl" placeholder="http://localhost:4020" value="http://localhost:4020" style="width:100%;padding:8px 10px;background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:11px;border-radius:2px">
           </div>
 
           <!-- LIVE / SIM TOGGLE -->
@@ -862,6 +863,8 @@ function clog(tag,msg,category='rpc'){
   const entry={tag,msg,category,time:ts()};
   LOG.push(entry);
   renderLine(entry);
+  // Only update stats if DOM is ready
+  if(document.readyState === 'loading') return;
   updateStats();
 }
 
@@ -891,20 +894,32 @@ function setFilter(f,btn){
 
 function clearConsole(){
   LOG.length=0;csTotal=0;csWins=0;csLosses=0;csMsArr=[];
-  document.getElementById('consoleBody').innerHTML='<div class="console-empty" id="consoleEmpty">awaiting execution — run a command above</div>';
-  ['csTotal','csWins','csLosses'].forEach(id=>document.getElementById(id).textContent='0');
-  document.getElementById('csWinRate').textContent='—';
-  document.getElementById('csAvgMs').textContent='—';
+  const consoleBody=document.getElementById('consoleBody');
+  if(consoleBody) consoleBody.innerHTML='<div class="console-empty" id="consoleEmpty">awaiting execution — run a command above</div>';
+  ['csTotal','csWins','csLosses'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.textContent='0';
+  });
+  const csWinRateEl=document.getElementById('csWinRate');
+  const csAvgMsEl=document.getElementById('csAvgMs');
+  if(csWinRateEl) csWinRateEl.textContent='—';
+  if(csAvgMsEl) csAvgMsEl.textContent='—';
 }
 
 function updateStats(){
   const total=csWins+csLosses;  // total = accept outcomes only; always consistent
-  document.getElementById('csTotal').textContent=total||csTotal;
-  document.getElementById('csWins').textContent=csWins;
-  document.getElementById('csLosses').textContent=csLosses;
+  const csTotalEl=document.getElementById('csTotal');
+  const csWinsEl=document.getElementById('csWins');
+  const csLossesEl=document.getElementById('csLosses');
+  const csWinRateEl=document.getElementById('csWinRate');
+  const csAvgMsEl=document.getElementById('csAvgMs');
+  
+  if(csTotalEl) csTotalEl.textContent=total||csTotal;
+  if(csWinsEl) csWinsEl.textContent=csWins;
+  if(csLossesEl) csLossesEl.textContent=csLosses;
   const rounds=csWins+csLosses;
-  document.getElementById('csWinRate').textContent=rounds?Math.round(csWins/rounds*100)+'%':'—';
-  document.getElementById('csAvgMs').textContent=csMsArr.length?Math.round(csMsArr.reduce((a,b)=>a+b,0)/csMsArr.length)+'ms':'—';
+  if(csWinRateEl) csWinRateEl.textContent=rounds?Math.round(csWins/rounds*100)+'%':'—';
+  if(csAvgMsEl) csAvgMsEl.textContent=csMsArr.length?Math.round(csMsArr.reduce((a,b)=>a+b,0)/csMsArr.length)+'ms':'—';
 }
 
 // ── EXECUTE (single step, advances the sequence) ─────────────────
@@ -922,7 +937,7 @@ async function execute(){
   const liveModeEl=document.getElementById('liveMode');
   const live=liveModeEl?liveModeEl.checked:false;
   const baseUrlEl=document.getElementById('baseUrl');
-  const baseUrl=baseUrlEl?baseUrlEl.value.replace(/\/$/,''):'http://localhost:54321';
+  const baseUrl=baseUrlEl?baseUrlEl.value.replace(/\/$/,''):'http://localhost:4020';
 
   try{
     if(k==='mkchap'){
@@ -1048,7 +1063,7 @@ async function runFullRound(){
 
   const p=PLANS[plan];
   const baseUrlEl=document.getElementById('baseUrl');
-  const baseUrl=baseUrlEl?baseUrlEl.value.replace(/\/$/,''):'http://localhost:54321';
+  const baseUrl=baseUrlEl?baseUrlEl.value.replace(/\/$/,''):'http://localhost:4020';
   const liveModeEl=document.getElementById('liveMode');
   const live=liveModeEl?liveModeEl.checked:false;
   const risk=getRisk();
