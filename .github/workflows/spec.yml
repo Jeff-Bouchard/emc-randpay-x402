@@ -1,0 +1,19 @@
+name: Verify spec
+
+on:
+  push:
+    paths:
+      - 'specs/**'
+      - 'scripts/verify-spec.sh'
+      - '.github/workflows/spec.yml'
+  pull_request:
+    paths:
+      - 'specs/**'
+
+jobs:
+  spec-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run spec verifier
+        run: bash scripts/verify-spec.sh

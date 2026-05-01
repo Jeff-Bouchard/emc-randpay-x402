@@ -1,0 +1,14 @@
+{
+  "name": "x402-randpay",
+  "version": "1.0.0",
+  "description": "HTTP 402 Payment Required — Emercoin randpay subscription gateway",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev":   "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "engines": { "node": ">=18" }
+}

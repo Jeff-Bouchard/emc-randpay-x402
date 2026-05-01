@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMC-randpay · x402 Scheme</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0c0e;
+  --bg2:#111416;
+  --bg3:#181c20;
+  --border:#232830;
+  --border2:#2e3540;
+  --teal:#1db985;
+  --teal2:#0d8f62;
+  --teal-dim:#0d3d2a;
+  --amber:#e8a030;
+  --amber-dim:#3d2c0a;
+  --coral:#e05a35;
+  --text:#e8e4dc;
+  --text2:#8a9099;
+  --text3:#4a5260;
+  --mono:'JetBrains Mono',monospace;
+  --serif:'Fraunces',serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:14px;line-height:1.6;min-height:100vh;overflow-x:hidden}
+
+/* ── grid texture ── */
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:48px 48px;opacity:.35;pointer-events:none;z-index:0}
+
+.page{position:relative;z-index:1}
+
+/* ── NAV ── */
+nav{position:sticky;top:0;z-index:100;background:rgba(10,12,14,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0;padding:0 32px;height:52px}
+.nav-logo{font-family:var(--serif);font-size:18px;font-weight:600;color:var(--text);letter-spacing:-.02em;margin-right:auto}
+.nav-logo span{color:var(--teal)}
+.nav-link{font-size:11px;color:var(--text2);text-decoration:none;padding:0 16px;height:52px;display:flex;align-items:center;border-bottom:2px solid transparent;transition:all .2s;letter-spacing:.04em}
+.nav-link:hover{color:var(--text);border-bottom-color:var(--border2)}
+.nav-link.active{color:var(--teal);border-bottom-color:var(--teal)}
+.nav-tag{margin-left:16px;font-size:9px;padding:3px 8px;background:var(--teal-dim);color:var(--teal);border:1px solid var(--teal2);border-radius:2px;letter-spacing:.06em}
+
+/* ── HERO ── */
+.hero{padding:96px 32px 80px;max-width:900px;margin:0 auto}
+.hero-eyebrow{font-size:10px;letter-spacing:.12em;color:var(--teal);margin-bottom:24px;display:flex;align-items:center;gap:10px}
+.hero-eyebrow::before{content:'';display:block;width:32px;height:1px;background:var(--teal)}
+.hero h1{font-family:var(--serif);font-size:clamp(42px,6vw,72px);font-weight:600;line-height:1.08;letter-spacing:-.03em;color:var(--text);margin-bottom:24px}
+.hero h1 em{font-style:italic;color:var(--teal)}
+.hero-sub{font-size:15px;color:var(--text2);max-width:560px;line-height:1.8;margin-bottom:40px}
+.hero-sub strong{color:var(--text);font-weight:500}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap}
+.btn{font-family:var(--mono);font-size:12px;padding:10px 20px;border-radius:3px;cursor:pointer;letter-spacing:.04em;text-decoration:none;transition:all .18s;display:inline-flex;align-items:center;gap:8px;font-weight:500}
+.btn-primary{background:var(--teal);color:#000;border:1px solid var(--teal)}
+.btn-primary:hover{background:var(--teal2);border-color:var(--teal2)}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}
+.btn-ghost:hover{color:var(--text);border-color:var(--text3)}
+
+/* ── STAT ROW ── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin:0 32px 80px}
+.stat{background:var(--bg2);padding:24px 28px}
+.stat-num{font-family:var(--serif);font-size:36px;font-weight:700;color:var(--teal);letter-spacing:-.03em;line-height:1}
+.stat-label{font-size:10px;color:var(--text3);margin-top:6px;letter-spacing:.06em}
+
+/* ── SECTION ── */
+.section{padding:0 32px 80px;max-width:1100px;margin:0 auto}
+.section-head{display:flex;align-items:baseline;gap:16px;margin-bottom:40px;border-bottom:1px solid var(--border);padding-bottom:16px}
+.section-num{font-size:10px;color:var(--text3);letter-spacing:.08em;flex-shrink:0}
+.section-title{font-family:var(--serif);font-size:28px;font-weight:600;letter-spacing:-.02em;color:var(--text)}
+
+/* ── FLOW ── */
+.flow{display:grid;grid-template-columns:1fr 32px 1fr 32px 1fr;align-items:start;gap:0;margin-bottom:48px}
+.flow-node{background:var(--bg2);border:1px solid var(--border);padding:20px 24px;position:relative;transition:border-color .2s,background .2s;cursor:default}
+.flow-node:hover{border-color:var(--border2);background:var(--bg3)}
+.flow-node-tag{font-size:9px;letter-spacing:.08em;padding:2px 7px;border-radius:2px;display:inline-block;margin-bottom:10px;font-weight:500}
+.tag-server{background:var(--teal-dim);color:var(--teal);border:1px solid var(--teal2)}
+.tag-client{background:var(--amber-dim);color:var(--amber);border:1px solid #6b4a12}
+.flow-node-rpc{font-size:12px;color:var(--text);margin-bottom:6px;font-weight:500}
+.flow-node-rpc span{color:var(--teal)}
+.flow-node-desc{font-size:11px;color:var(--text2);line-height:1.6}
+.flow-node-num{position:absolute;top:16px;right:16px;font-size:10px;color:var(--text3)}
+.flow-arrow{display:flex;align-items:center;justify-content:center;padding-top:40px;color:var(--text3);font-size:18px}
+.flow-result{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px}
+.result-card{padding:16px 20px;border:1px solid var(--border)}
+.result-card.win{border-color:var(--teal2);background:var(--teal-dim)}
+.result-card.loss{border-color:#3d2c0a;background:var(--amber-dim)}
+.result-label{font-size:10px;letter-spacing:.06em;margin-bottom:6px}
+.result-card.win .result-label{color:var(--teal)}
+.result-card.loss .result-label{color:var(--amber)}
+.result-val{font-size:12px;color:var(--text2)}
+
+/* ── PLAYGROUND ── */
+.playground{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border)}
+.pg-panel{background:var(--bg2);padding:24px}
+.pg-label{font-size:10px;letter-spacing:.08em;color:var(--text3);margin-bottom:16px}
+.pg-select{width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:12px;padding:9px 12px;appearance:none;cursor:pointer;outline:none;border-radius:2px;margin-bottom:16px}
+.pg-select:focus{border-color:var(--teal)}
+.pg-field{margin-bottom:12px}
+.pg-field-label{font-size:10px;color:var(--text3);letter-spacing:.04em;margin-bottom:5px;display:flex;justify-content:space-between}
+.pg-field-type{color:var(--text3);opacity:.6}
+.pg-input{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:11px;padding:7px 10px;outline:none;border-radius:2px;transition:border-color .15s}
+.pg-input:focus{border-color:var(--teal)}
+.pg-textarea{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:10px;padding:8px 10px;outline:none;border-radius:2px;resize:vertical;min-height:56px;line-height:1.6;transition:border-color .15s}
+.pg-textarea:focus{border-color:var(--teal)}
+.pg-slider-wrap{margin-bottom:12px}
+.pg-slider-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.pg-slider-label{font-size:10px;color:var(--text3);flex:1}
+.pg-slider-val{font-size:13px;color:var(--teal);font-weight:500;min-width:36px;text-align:right}
+input[type=range]{flex:1;-webkit-appearance:none;height:3px;background:var(--border2);border-radius:2px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--teal);border:2px solid var(--bg);transition:transform .1s}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
+.pg-desc{background:var(--bg3);border-left:2px solid var(--teal2);padding:10px 14px;font-size:11px;color:var(--text2);line-height:1.6;margin-bottom:16px;border-radius:0 2px 2px 0}
+.pg-desc code{color:var(--teal);font-size:10px}
+.exec-btn{width:100%;padding:10px;background:var(--teal);color:#000;border:none;font-family:var(--mono);font-size:12px;font-weight:600;cursor:pointer;border-radius:2px;letter-spacing:.04em;transition:all .15s}
+.exec-btn:hover{background:var(--teal2)}
+.exec-btn:active{transform:scale(.98)}
+.exec-btn.loading{background:var(--amber);color:#000}
+.exec-btn.err{background:var(--coral);color:#fff}
+
+/* response panel */
+.resp-status{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.status-badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:2px}
+.s200{background:rgba(29,185,133,.15);color:var(--teal);border:1px solid var(--teal2)}
+.s402{background:rgba(232,160,48,.12);color:var(--amber);border:1px solid #6b4a12}
+.s502{background:rgba(224,90,53,.12);color:var(--coral);border:1px solid #7a2e15}
+.resp-ms{font-size:10px;color:var(--text3);margin-left:auto}
+.resp-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:14px}
+.rtab{font-size:10px;letter-spacing:.04em;padding:5px 14px;cursor:pointer;color:var(--text3);border-bottom:2px solid transparent;transition:all .15s}
+.rtab.active{color:var(--teal);border-bottom-color:var(--teal)}
+.resp-body{background:var(--bg3);border:1px solid var(--border);padding:14px;font-size:11px;line-height:1.8;min-height:160px;border-radius:2px;overflow-x:auto;white-space:pre}
+.resp-empty{color:var(--text3);font-style:italic}
+.jk{color:#5ca8e8}.js{color:var(--amber)}.jn{color:#b48ede}.jb{color:var(--teal)}
+.hdr-table{width:100%;font-size:10px;border-collapse:collapse}
+.hdr-table td{padding:4px 8px;border-bottom:1px solid var(--border);vertical-align:top}
+.hdr-table td:first-child{color:var(--text3);width:46%}
+.hdr-table td:last-child{color:var(--teal);word-break:break-all}
+
+/* ── PLANS ── */
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:48px}
+.plan-card{background:var(--bg2);border:1px solid var(--border);padding:28px 32px;position:relative;transition:border-color .2s}
+.plan-card:hover{border-color:var(--border2)}
+.plan-card.featured{border-color:var(--teal2)}
+.plan-badge{position:absolute;top:16px;right:16px;font-size:9px;padding:2px 8px;background:var(--teal-dim);color:var(--teal);border:1px solid var(--teal2);letter-spacing:.06em}
+.plan-name{font-family:var(--serif);font-size:24px;font-weight:700;color:var(--text);letter-spacing:-.02em;margin-bottom:4px}
+.plan-price{font-size:28px;color:var(--teal);font-weight:600;letter-spacing:-.02em;margin-bottom:2px}
+.plan-price-sub{font-size:10px;color:var(--text3);margin-bottom:20px}
+.plan-rows{border-top:1px solid var(--border);padding-top:16px}
+.plan-row{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--border)}
+.plan-row:last-child{border-bottom:none}
+.plan-row-k{font-size:11px;color:var(--text3)}
+.plan-row-v{font-size:11px;color:var(--text);font-weight:500}
+.plan-row-v.teal{color:var(--teal)}
+
+/* ── SCHEME BOX ── */
+.scheme-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:32px}
+.scheme-cell{background:var(--bg2);padding:20px 24px}
+.scheme-cell-label{font-size:10px;color:var(--text3);letter-spacing:.06em;margin-bottom:8px}
+.scheme-cell-val{font-size:13px;color:var(--text);font-weight:500}
+.scheme-cell-val code{font-size:12px;color:var(--teal)}
+.scheme-cell-sub{font-size:10px;color:var(--text3);margin-top:4px}
+
+/* ── COMPARE ── */
+.compare-table{width:100%;border-collapse:collapse;font-size:12px}
+.compare-table th{text-align:left;font-size:10px;letter-spacing:.06em;color:var(--text3);padding:8px 16px;border-bottom:1px solid var(--border);font-weight:500}
+.compare-table td{padding:10px 16px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top}
+.compare-table td:first-child{color:var(--text3)}
+.compare-table td.hi{color:var(--teal)}
+.compare-table tr:last-child td{border-bottom:none}
+.compare-table tr:hover td{background:var(--bg2)}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--border);padding:32px;display:flex;align-items:center;gap:16px;font-size:11px;color:var(--text3)}
+footer a{color:var(--text2);text-decoration:none}
+footer a:hover{color:var(--teal)}
+.footer-dot{width:3px;height:3px;border-radius:50%;background:var(--border2);flex-shrink:0}
+
+/* ── TOKEN BAR ── */
+.token-bar{position:fixed;bottom:0;left:0;right:0;background:var(--teal-dim);border-top:1px solid var(--teal2);padding:10px 32px;display:flex;align-items:center;gap:12px;transform:translateY(100%);transition:transform .3s;z-index:200}
+.token-bar.show{transform:translateY(0)}
+.token-bar-label{font-size:10px;color:var(--teal);letter-spacing:.06em;flex-shrink:0}
+.token-bar-val{font-size:11px;color:var(--teal);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;opacity:.8}
+.token-bar-copy{font-size:11px;padding:4px 12px;border:1px solid var(--teal2);color:var(--teal);background:transparent;cursor:pointer;border-radius:2px;transition:all .15s;flex-shrink:0}
+.token-bar-copy:hover{background:var(--teal);color:#000}
+.token-bar-plan{font-size:10px;padding:2px 8px;background:rgba(29,185,133,.12);color:var(--teal);border-radius:2px;flex-shrink:0}
+
+/* ── CONSOLE ── */
+.console-wrap{margin:0 32px 80px;max-width:1100px;margin-left:auto;margin-right:auto;padding:0 32px 80px}
+.console-bar{display:flex;align-items:center;gap:0;background:var(--bg2);border:1px solid var(--border);border-bottom:none;padding:0 16px;height:38px}
+.console-bar-title{font-size:10px;letter-spacing:.08em;color:var(--text3);flex:1}
+.console-dots{display:flex;gap:6px;margin-right:12px}
+.console-dot{width:10px;height:10px;border-radius:50%}
+.console-controls{display:flex;gap:1px}
+.console-ctrl{font-size:10px;padding:4px 10px;background:transparent;border:1px solid var(--border2);color:var(--text3);cursor:pointer;transition:all .15s;font-family:var(--mono)}
+.console-ctrl:hover{color:var(--text);border-color:var(--border2)}
+.console-ctrl.active{color:var(--teal);border-color:var(--teal2)}
+.console-body{background:var(--bg);border:1px solid var(--border);height:280px;overflow-y:auto;padding:12px 16px;font-size:11px;line-height:1.9;scroll-behavior:smooth;position:relative}
+.console-body::-webkit-scrollbar{width:4px}
+.console-body::-webkit-scrollbar-track{background:transparent}
+.console-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.cline{display:flex;gap:10px;align-items:baseline;border-bottom:1px solid rgba(255,255,255,.025);padding:1px 0;animation:fadeIn .15s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateX(-4px)}to{opacity:1;transform:translateX(0)}}
+.cline:last-child{border-bottom:none}
+.ctime{color:var(--text3);flex-shrink:0;min-width:56px;font-size:10px;opacity:.7}
+.ctag{font-size:9px;padding:1px 6px;border-radius:2px;flex-shrink:0;min-width:52px;text-align:center;font-weight:600;letter-spacing:.05em}
+.ctag-info{background:rgba(29,185,133,.12);color:var(--teal);border:1px solid var(--teal-dim)}
+.ctag-send{background:rgba(122,139,224,.12);color:#7a8be0;border:1px solid rgba(122,139,224,.2)}
+.ctag-ok{background:rgba(29,185,133,.18);color:#2dd9a0;border:1px solid var(--teal2)}
+.ctag-402{background:rgba(232,160,48,.14);color:var(--amber);border:1px solid var(--amber-dim)}
+.ctag-win{background:rgba(29,185,133,.25);color:#fff;border:1px solid var(--teal)}
+.ctag-loss{background:rgba(232,160,48,.2);color:var(--amber);border:1px solid #6b4a12}
+.ctag-err{background:rgba(224,90,53,.15);color:var(--coral);border:1px solid #7a2e15}
+.ctag-rpc{background:rgba(180,142,222,.12);color:#b48ede;border:1px solid rgba(180,142,222,.2)}
+.cmsg{color:var(--text2);flex:1;word-break:break-all}
+.cmsg .hi{color:var(--teal)}
+.cmsg .am{color:var(--amber)}
+.cmsg .pu{color:#b48ede}
+.cmsg .re{color:var(--coral)}
+.cmsg .di{color:var(--text3)}
+.console-empty{color:var(--text3);font-style:italic;padding:80px 0;text-align:center;font-size:12px}
+.console-stats-bar{display:flex;gap:0;border:1px solid var(--border);border-top:none}
+.cstat{flex:1;padding:8px 16px;font-size:10px;color:var(--text3);border-right:1px solid var(--border);display:flex;gap:8px;align-items:baseline}
+.cstat:last-child{border-right:none}
+.cstat-val{font-size:14px;font-weight:600;color:var(--text2);font-family:var(--serif)}
+.cstat-val.teal{color:var(--teal)}
+.cstat-val.amber{color:var(--amber)}
+
+/* ── STEP BUTTONS ── */
+.step-btn{background:var(--bg2);border:1px solid var(--border);padding:14px 12px;cursor:pointer;text-align:left;font-family:var(--mono);transition:all .25s;position:relative;border-radius:2px;outline:none}
+.step-btn:hover:not(:disabled):not(.locked){background:var(--bg3);border-color:var(--border2)}
+.step-btn.active{border-color:var(--teal);background:var(--teal-dim);box-shadow:0 0 0 1px var(--teal2)}
+.step-btn.active::before{content:'';position:absolute;top:-1px;left:-1px;right:-1px;height:2px;background:var(--teal);border-radius:1px}
+.step-btn.done{opacity:.45;background:var(--bg);border-color:var(--border);cursor:default}
+.step-btn.done .step-btn-num{background:var(--teal);color:#000;border-color:var(--teal)}
+.step-btn.done .step-btn-num::after{content:'✓';position:absolute;font-size:10px;top:50%;left:50%;transform:translate(-50%,-50%);font-weight:700}
+.step-btn.done .step-btn-num span{display:none}
+.step-btn.locked{opacity:.5;cursor:not-allowed}
+.step-btn-num{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:1px solid var(--border2);font-size:10px;color:var(--text3);font-weight:600;margin-bottom:6px;position:relative}
+.step-btn.active .step-btn-num{background:var(--teal);color:#000;border-color:var(--teal);font-weight:700}
+.step-btn-name{font-size:12px;color:var(--text);font-weight:500;margin-bottom:2px;letter-spacing:-.01em}
+.step-btn.active .step-btn-name{color:var(--teal)}
+.step-btn-side{font-size:9px;color:var(--text3);letter-spacing:.06em}
+
+/* ── ANIM ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fade-up{animation:fadeUp .4s ease forwards}
+.spin{display:inline-block;animation:spin .6s linear infinite;margin-right:6px}
+
+/* ── FLOW STEPPER ── */
+.stepper{display:flex;align-items:center;gap:0;margin-bottom:32px;padding:16px 24px;background:var(--bg2);border:1px solid var(--border)}
+.step{display:flex;align-items:center;gap:8px;flex:1}
+.step-dot{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;color:var(--text3);flex-shrink:0;transition:all .3s}
+.step-dot.done{background:var(--teal);border-color:var(--teal);color:#000}
+.step-dot.active{border-color:var(--amber);color:var(--amber);box-shadow:0 0 0 3px var(--amber-dim)}
+.step-label{font-size:10px;color:var(--text3);letter-spacing:.03em;transition:color .3s}
+.step-label.active{color:var(--amber)}
+.step-label.done{color:var(--teal)}
+.step-sep{color:var(--text3);font-size:12px;margin:0 6px;flex-shrink:0;opacity:.4}
+</style>
+</head>
+<body>
+<div class="page">
+
+<nav>
+  <div class="nav-logo">emc<span>·</span>randpay</div>
+  <a href="#flow" class="nav-link">flow</a>
+  <a href="#playground" class="nav-link">playground</a>
+  <a href="#plans" class="nav-link">plans</a>
+  <a href="#compare" class="nav-link">compare</a>
+  <a href="https://github.com/x402-foundation/x402" target="_blank" class="nav-link">x402 foundation ↗</a>
+  <span class="nav-tag">DRAFT SCHEME</span>
+</nav>
+
+<!-- HERO -->
+<section class="hero fade-up">
+  <div class="hero-eyebrow">x402 · EMC-randpay · probabilistic micropayment</div>
+  <h1>Pay once.<br><em>Settle rarely.</em><br>Same value.</h1>
+  <p class="hero-sub">
+    <strong>randpay</strong> is a probabilistic payment scheme for Emercoin, proposed for
+    registration in the x402 foundation. At <strong>risk=0.01</strong>, 100 API calls
+    produce one on-chain transaction — with mathematically identical expected revenue.
+    No smart contracts. No gas token. No facilitator. <strong>emercoind is the facilitator.</strong>
+  </p>
+  <div class="hero-actions">
+    <a href="#playground" class="btn btn-primary">open playground</a>
+    <a href="https://github.com/x402-foundation/x402/tree/main/specs/schemes" target="_blank" class="btn btn-ghost">specs/ on github ↗</a>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat"><div class="stat-num">3</div><div class="stat-label">RPC CALLS TOTAL</div></div>
+  <div class="stat"><div class="stat-num" id="statTx">1%</div><div class="stat-label">ON-CHAIN TX RATE</div></div>
+  <div class="stat"><div class="stat-num">0</div><div class="stat-label">THIRD-PARTY FACILITATORS</div></div>
+  <div class="stat"><div class="stat-num">8</div><div class="stat-label">EMC DECIMAL PLACES</div></div>
+</div>
+
+<!-- FLOW SECTION -->
+<section class="section" id="flow">
+  <div class="section-head">
+    <span class="section-num">01</span>
+    <h2 class="section-title">Protocol flow</h2>
+  </div>
+
+  <div class="flow">
+    <div class="flow-node">
+      <span class="flow-node-tag tag-server">SERVER</span>
+      <div class="flow-node-num">01</div>
+      <div class="flow-node-rpc"><span>randpay_mkchap</span> amt risk t</div>
+      <div class="flow-node-desc">Server calls emercoind. Returns CHAP hex — a single-use challenge bound to amount, risk, and timeout. Embedded in X-PAYMENT-REQUIRED header of the 402 response.</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">
+      <span class="flow-node-tag tag-client">CLIENT</span>
+      <div class="flow-node-num">02</div>
+      <div class="flow-node-rpc"><span>randpay_mktx</span> "chap" t</div>
+      <div class="flow-node-desc">Client runs this on their own emercoind node. Signs the CHAP and builds a probabilistic raw transaction. No funds move yet. Returns rawtx hex, sent back as X-PAYMENT-SIGNATURE.</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">
+      <span class="flow-node-tag tag-server">SERVER</span>
+      <div class="flow-node-num">03</div>
+      <div class="flow-node-rpc"><span>randpay_accept</span> hexstring</div>
+      <div class="flow-node-desc">Server calls emercoind with the rawtx. Probabilistic outcome is determined. Returns true (winner) or false (non-winner). Throws on invalid, expired, or replayed CHAP.</div>
+    </div>
+  </div>
+
+  <div class="flow-result">
+    <div class="result-card win">
+      <div class="result-label">WINNER → 200 OK</div>
+      <div class="result-val">randpay_accept returns true. emercoind broadcasts the winning tx. Server fulfills the request. X-PAYMENT-RESPONSE header confirms settlement. No additional step.</div>
+    </div>
+    <div class="result-card loss">
+      <div class="result-label">NON-WINNER → 402 (fresh CHAP)</div>
+      <div class="result-val">randpay_accept returns false. No tx broadcast. No funds moved. Server returns 402 with a fresh CHAP embedded. Client retries immediately — no extra round-trip.</div>
+    </div>
+  </div>
+</section>
+
+<!-- PLAYGROUND — sticky left console + step buttons + tutorial -->
+<section style="padding:0 32px 80px;max-width:1320px;margin:0 auto" id="playground">
+  <div class="section-head" style="max-width:1100px;margin-left:auto;margin-right:auto;width:100%">
+    <span class="section-num">02</span>
+    <h2 class="section-title">Playground</h2>
+  </div>
+
+  <div class="stepper" id="stepper" style="max-width:1100px;margin-left:auto;margin-right:auto">
+    <div class="step"><div class="step-dot active" id="sd0">1</div><span class="step-label active" id="sl0">mkchap</span></div>
+    <span class="step-sep">›</span>
+    <div class="step"><div class="step-dot" id="sd1">2</div><span class="step-label" id="sl1">mktx</span></div>
+    <span class="step-sep">›</span>
+    <div class="step"><div class="step-dot" id="sd2">3</div><span class="step-label" id="sl2">accept</span></div>
+    <span class="step-sep">›</span>
+    <div class="step"><div class="step-dot" id="sd3">4</div><span class="step-label" id="sl3">402 / resource</span></div>
+    <span class="step-sep">›</span>
+    <div class="step"><div class="step-dot" id="sd4">5</div><span class="step-label" id="sl4">x402 open</span></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:380px 1fr;gap:24px;align-items:start">
+
+    <!-- ── STICKY LEFT CONSOLE ── -->
+    <div style="position:sticky;top:64px">
+      <div class="console-bar">
+        <div class="console-dots">
+          <div class="console-dot" style="background:#e05a35"></div>
+          <div class="console-dot" style="background:#e8a030"></div>
+          <div class="console-dot" style="background:#1db985"></div>
+        </div>
+        <span class="console-bar-title">SESSION LOG</span>
+      </div>
+      <div style="display:flex;gap:1px;align-items:center;background:var(--bg2);border:1px solid var(--border);border-top:none;border-bottom:none;padding:6px 10px">
+        <button class="console-ctrl active" id="filterAll" onclick="setFilter('all',this)">all</button>
+        <button class="console-ctrl" id="filterRpc" onclick="setFilter('rpc',this)">rpc</button>
+        <button class="console-ctrl" id="filterHttp" onclick="setFilter('http',this)">http</button>
+        <button class="console-ctrl" id="filterResult" onclick="setFilter('result',this)">result</button>
+        <span style="width:1px;height:14px;background:var(--border2);margin:0 6px"></span>
+        <button class="console-ctrl" onclick="clearConsole()" style="color:var(--coral)">clear</button>
+      </div>
+      <div class="console-body" id="consoleBody" style="height:calc(100vh - 220px);min-height:380px;max-height:560px">
+        <div class="console-empty" id="consoleEmpty">awaiting execution — follow the tutorial on the right</div>
+      </div>
+      <div class="console-stats-bar" style="display:grid;grid-template-columns:1fr 1fr;gap:1px">
+        <div class="cstat"><span class="cstat-val teal" id="csTotal">0</span> rounds</div>
+        <div class="cstat"><span class="cstat-val teal" id="csWins">0</span> wins</div>
+        <div class="cstat"><span class="cstat-val amber" id="csLosses">0</span> non-winners</div>
+        <div class="cstat"><span class="cstat-val" id="csWinRate">—</span> win rate</div>
+      </div>
+    </div>
+
+    <!-- ── RIGHT: TUTORIAL + STEP BUTTONS + RESPONSE ── -->
+    <div>
+
+      <!-- TUTORIAL CALLOUT -->
+      <div id="tutorialBox" style="background:linear-gradient(transparent,transparent),var(--bg2);border:1px solid var(--teal2);padding:14px 18px;margin-bottom:16px;border-left:3px solid var(--teal);position:relative">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <span style="font-size:9px;letter-spacing:.08em;color:var(--teal);font-weight:600">TUTORIAL</span>
+          <span id="tutStepBadge" style="font-size:10px;color:var(--text3)">step 1 of 3</span>
+          <span style="margin-left:auto;font-size:9px;color:var(--text3)" id="tutHint">click the highlighted button below ↓</span>
+        </div>
+        <div id="tutorialText" style="font-size:13px;color:var(--text);line-height:1.6">
+          <strong style="color:var(--teal)">Welcome.</strong> The randpay flow has 3 RPC calls. Click <code style="color:var(--teal);font-size:12px">randpay_mkchap</code> below to generate a CHAP — a single-use challenge that locks in the amount, risk, and timeout.
+        </div>
+      </div>
+
+      <!-- 3 STEP BUTTONS -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
+        <button class="step-btn active" id="btn-mkchap" onclick="selectCmd('mkchap')">
+          <div class="step-btn-num">1</div>
+          <div class="step-btn-name">randpay_mkchap</div>
+          <div class="step-btn-side">SERVER · CHAP</div>
+        </button>
+        <button class="step-btn locked" id="btn-mktx" onclick="selectCmd('mktx')">
+          <div class="step-btn-num">2</div>
+          <div class="step-btn-name">randpay_mktx</div>
+          <div class="step-btn-side">CLIENT · sign</div>
+        </button>
+        <button class="step-btn locked" id="btn-accept" onclick="selectCmd('accept')">
+          <div class="step-btn-num">3</div>
+          <div class="step-btn-name">randpay_accept</div>
+          <div class="step-btn-side">SERVER · settle</div>
+        </button>
+      </div>
+
+      <!-- COMMAND PANEL + RESPONSE -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border)">
+        <div class="pg-panel" style="border-right:1px solid var(--border)">
+          <div class="pg-label">PARAMETERS</div>
+          <div id="pgDesc" class="pg-desc"></div>
+          <div id="pgFields"></div>
+
+          <!-- LIVE / SIM TOGGLE -->
+          <label style="display:flex;align-items:flex-start;gap:8px;margin:14px 0 0;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);cursor:pointer;border-radius:2px">
+            <input type="checkbox" id="liveMode" style="margin-top:2px;accent-color:var(--teal);cursor:pointer">
+            <div style="flex:1">
+              <div style="font-size:11px;color:var(--text);font-weight:500;margin-bottom:2px">Use real EMC payments</div>
+              <div style="font-size:10px;color:var(--text3);line-height:1.5">When checked, calls hit the live x402 server at the configured URL. <strong style="color:var(--amber)">Real EMC moves on winning tickets.</strong> Unchecked = simulated.</div>
+            </div>
+          </label>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
+            <button class="exec-btn" id="execBtn" onclick="execute()" style="margin-top:0">Execute step →</button>
+            <button class="exec-btn" id="wizBtn" onclick="runFullRound()" style="margin-top:0;background:transparent;border:1px solid var(--teal);color:var(--teal)">⟳ Full round</button>
+          </div>
+          <div id="wizStatus" style="display:none;margin-top:10px;padding:8px 12px;background:var(--bg3);border-left:2px solid var(--amber);font-size:10px;color:var(--amber);line-height:1.7"></div>
+        </div>
+
+        <div class="pg-panel">
+          <div class="pg-label">RESPONSE</div>
+          <div id="respStatus" class="resp-status" style="display:none">
+            <span class="status-badge" id="sBadge"></span>
+            <span id="sMethod" style="font-size:10px;color:var(--text3)"></span>
+            <span class="resp-ms" id="sMs"></span>
+          </div>
+          <div class="resp-tabs">
+            <div class="rtab active" onclick="tab('body',this)">body</div>
+            <div class="rtab" onclick="tab('hdrs',this)">headers</div>
+          </div>
+          <div id="tabBody">
+            <div class="resp-body resp-empty" id="respBody">// run a command</div>
+          </div>
+          <div id="tabHdrs" style="display:none">
+            <table class="hdr-table" id="hdrTable"><tr><td colspan="2" style="color:var(--text3);font-style:italic;font-size:10px">—</td></tr></table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- PLANS -->
+<section class="section" id="plans">
+  <div class="section-head">
+    <span class="section-num">03</span>
+    <h2 class="section-title">Subscription plans</h2>
+  </div>
+  <div class="plans">
+    <div class="plan-card">
+      <div class="plan-name">7-day</div>
+      <div class="plan-price">0.05 <span style="font-size:16px;font-weight:400">EMC</span></div>
+      <div class="plan-price-sub">per subscription period</div>
+      <div class="plan-rows">
+        <div class="plan-row"><span class="plan-row-k">risk</span><span class="plan-row-v teal">0.10</span></div>
+        <div class="plan-row"><span class="plan-row-k">expected value</span><span class="plan-row-v">0.04500000 EMC</span></div>
+        <div class="plan-row"><span class="plan-row-k">avg attempts to win</span><span class="plan-row-v">~1.11</span></div>
+        <div class="plan-row"><span class="plan-row-k">chap timeout</span><span class="plan-row-v">300s</span></div>
+        <div class="plan-row"><span class="plan-row-k">access duration</span><span class="plan-row-v">7 days</span></div>
+      </div>
+    </div>
+    <div class="plan-card featured">
+      <div class="plan-badge">RECOMMENDED</div>
+      <div class="plan-name">30-day</div>
+      <div class="plan-price">0.15 <span style="font-size:16px;font-weight:400">EMC</span></div>
+      <div class="plan-price-sub">per subscription period</div>
+      <div class="plan-rows">
+        <div class="plan-row"><span class="plan-row-k">risk</span><span class="plan-row-v teal">0.03</span></div>
+        <div class="plan-row"><span class="plan-row-k">expected value</span><span class="plan-row-v">0.14550000 EMC</span></div>
+        <div class="plan-row"><span class="plan-row-k">avg attempts to win</span><span class="plan-row-v">~1.03</span></div>
+        <div class="plan-row"><span class="plan-row-k">chap timeout</span><span class="plan-row-v">300s</span></div>
+        <div class="plan-row"><span class="plan-row-k">access duration</span><span class="plan-row-v">30 days</span></div>
+      </div>
+    </div>
+  </div>
+  <div style="font-size:11px;color:var(--text3);line-height:1.8;padding:16px 24px;background:var(--bg2);border:1px solid var(--border)">
+    <strong style="color:var(--text2)">Risk rationale:</strong>
+    7-day uses risk=0.10 — short commitment, client retry cost is trivial, 10% miss rate acceptable.
+    30-day uses risk=0.03 — larger value at stake; at risk=0.10 a client could grind ~10 CHAPs before winning, effectively a discount attack at 30-day prices.
+    At risk=0.03, expected non-winning attempts before success is ~1.03 — not exploitable.
+  </div>
+</section>
+
+<!-- COMPARE -->
+<section class="section" id="compare">
+  <div class="section-head">
+    <span class="section-num">04</span>
+    <h2 class="section-title">vs. exact scheme</h2>
+  </div>
+  <div style="border:1px solid var(--border);overflow:hidden">
+  <table class="compare-table">
+    <thead><tr>
+      <th>property</th>
+      <th style="color:var(--teal)">EMC-randpay</th>
+      <th>exact (EVM)</th>
+    </tr></thead>
+    <tbody>
+      <tr><td>on-chain txs per request</td><td class="hi">risk × N  (fractional)</td><td>1 per request</td></tr>
+      <tr><td>confirmation wait</td><td class="hi">none — probabilistic, async</td><td>1+ blocks on critical path</td></tr>
+      <tr><td>facilitator required</td><td class="hi">no — emercoind is the facilitator</td><td>yes, third-party</td></tr>
+      <tr><td>smart contracts</td><td class="hi">none</td><td>Permit2 / EIP-3009 / ERC-7710</td></tr>
+      <tr><td>gas token</td><td class="hi">no gas — EMC is fee+payment</td><td>ETH for gas, token for payment</td></tr>
+      <tr><td>client requirement</td><td>emercoind + funded EMC wallet</td><td>EVM wallet + token approval</td></tr>
+      <tr><td>settlement model</td><td class="hi">probabilistic (fair by construction)</td><td>deterministic</td></tr>
+      <tr><td>fee per request</td><td class="hi">amortized across 1/risk requests</td><td>per-request</td></tr>
+      <tr><td>block space efficiency</td><td class="hi">1/risk × better</td><td>baseline</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- SCHEME FIELDS -->
+<section class="section">
+  <div class="section-head">
+    <span class="section-num">05</span>
+    <h2 class="section-title">PaymentRequirements fields</h2>
+  </div>
+  <div class="scheme-grid">
+    <div class="scheme-cell"><div class="scheme-cell-label">scheme</div><div class="scheme-cell-val"><code>"randpay"</code></div></div>
+    <div class="scheme-cell"><div class="scheme-cell-label">network</div><div class="scheme-cell-val"><code>"emc"</code></div><div class="scheme-cell-sub">Emercoin mainnet</div></div>
+    <div class="scheme-cell"><div class="scheme-cell-label">amount</div><div class="scheme-cell-val"><code>"5000000"</code></div><div class="scheme-cell-sub">satoshi string, 8 decimals (= 0.05 EMC)</div></div>
+    <div class="scheme-cell"><div class="scheme-cell-label">asset</div><div class="scheme-cell-val"><code>"EMC"</code></div><div class="scheme-cell-sub">native coin, no contract address</div></div>
+    <div class="scheme-cell"><div class="scheme-cell-label">extra.chap</div><div class="scheme-cell-val"><code>"a3f82c…d94e01"</code></div><div class="scheme-cell-sub">hex from randpay_mkchap, single-use</div></div>
+    <div class="scheme-cell"><div class="scheme-cell-label">extra.risk</div><div class="scheme-cell-val"><code>0.10</code></div><div class="scheme-cell-sub">prob of non-collection per ticket</div></div>
+    <div class="scheme-cell"><div class="scheme-cell-label">extra.expected</div><div class="scheme-cell-val"><code>"4500000"</code></div><div class="scheme-cell-sub">floor(amount × (1−risk)), informational</div></div>
+    <div class="scheme-cell"><div class="scheme-cell-label">maxTimeoutSeconds</div><div class="scheme-cell-val"><code>300</code></div><div class="scheme-cell-sub">must match randpay_mkchap timeout arg</div></div>
+  </div>
+</section>
+
+<footer>
+  <span>EMC-randpay x402 scheme · PrivateNess Network</span>
+  <span class="footer-dot"></span>
+  <span>randpay protocol by <a href="https://github.com/emercoin" target="_blank">Oleg Khovayko</a> · Emercoin CTO</span>
+  <span class="footer-dot"></span>
+  <a href="https://github.com/x402-foundation/x402" target="_blank">x402-foundation/x402 ↗</a>
+  <span class="footer-dot"></span>
+  <a href="https://privateness.network" target="_blank">privateness.network ↗</a>
+</footer>
+
+</div><!-- .page -->
+
+<!-- TOKEN BAR -->
+<div class="token-bar" id="tokenBar">
+  <span class="token-bar-label">X-SUB-TOKEN</span>
+  <span class="token-bar-val" id="tokenVal">—</span>
+  <span class="token-bar-plan" id="tokenPlan"></span>
+  <button class="token-bar-copy" id="copyBtn" onclick="copyTok()">copy</button>
+</div>
+
+<script>
+const PLANS = {
+  '7d': {amount:'0.05000000',amtSat:'5000000',risk:.10,timeout:300,ttl:7},
+  '30d':{amount:'0.15000000',amtSat:'15000000',risk:.03,timeout:300,ttl:30}
+};
+let plan='7d', lastChap='', lastRawtx='', subTok='', activeTab='body';
+
+const CMDS = {
+  mkchap:{side:'SERVER',rpc:'randpay_mkchap amount risk timeout',
+    desc:'Generates a CHAP hex. Call on server\'s emercoind. Returns hex bound to <code>amount</code>, <code>risk</code>, and <code>timeout</code>. Embed in X-PAYMENT-REQUIRED 402 response.',
+    flow:0,params:['amount','risk','timeout']},
+  mktx:{side:'CLIENT',rpc:'randpay_mktx "chap" timeout',
+    desc:'Run on client\'s own emercoind node. Signs the CHAP, builds probabilistic raw tx. Funds do not move yet. Returns rawtx hex — send as X-PAYMENT-SIGNATURE.',
+    flow:1,params:['chap','timeout']},
+  accept:{side:'SERVER',rpc:'randpay_accept hexstring',
+    desc:'Server calls with rawtx. Returns <code>true</code> (winner → broadcast + 200) or <code>false</code> (non-winner → fresh 402). Throws on invalid/expired/replayed CHAP.',
+    flow:2,params:['rawtx']},
+  cold:{side:'HTTP',rpc:'GET /api/* — 402 challenge',
+    desc:'Cold request — no credentials. Server calls <code>randpay_mkchap</code> and returns 402 with CHAP in <code>X-PAYMENT-REQUIRED</code>. This IS the challenge — no separate endpoint.',
+    flow:0,params:['path','xplan']},
+  retry:{side:'HTTP',rpc:'GET /api/* — X-PAYMENT retry',
+    desc:'Client retries with rawtx in <code>X-PAYMENT-SIGNATURE</code>. Server calls <code>randpay_accept</code>. Winner → 200 + X-Sub-Token. Non-winner → 402 + fresh CHAP embedded.',
+    flow:2,params:['path','xplan','rawtx']},
+  token:{side:'HTTP',rpc:'GET /api/* — X-Sub-Token',
+    desc:'Active subscription. Pass token from winning response. Server validates expiry — no RPC call. Open for plan duration.',
+    flow:4,params:['path','subtoken']},
+};
+
+function hex(n){return Array.from({length:n},()=>Math.floor(Math.random()*16).toString(16)).join('')}
+function rnd(ms){return 60+Math.floor(Math.random()*ms)}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+
+function setStep(s){
+  for(let i=0;i<5;i++){
+    const d=document.getElementById('sd'+i),l=document.getElementById('sl'+i);
+    d.className='step-dot'+(i<s?' done':i===s?' active':'');
+    l.className='step-label'+(i<s?' done':i===s?' active':'');
+  }
+}
+
+function tab(t,el){
+  activeTab=t;
+  document.querySelectorAll('.rtab').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tabBody').style.display=t==='body'?'':'none';
+  document.getElementById('tabHdrs').style.display=t==='hdrs'?'':'none';
+}
+
+function colorJson(j){
+  return j.replace(/"([^"]+)":/g,'<span class="jk">"$1"</span>:')
+          .replace(/: "([^"]*)"/g,': <span class="js">"$1"</span>')
+          .replace(/: (true|false)/g,': <span class="jb">$1</span>')
+          .replace(/: (-?\d+\.?\d*)/g,': <span class="jn">$1</span>');
+}
+
+function setResp(status,method,body,hdrs,ms){
+  const sb=document.getElementById('sBadge');
+  sb.textContent=status;
+  sb.className='status-badge s'+Math.floor(status/100)*100;
+  document.getElementById('sMethod').textContent=method;
+  document.getElementById('sMs').textContent=ms+'ms';
+  document.getElementById('respStatus').style.display='flex';
+  const rb=document.getElementById('respBody');
+  rb.className='resp-body';
+  if(body===null){rb.textContent='// 204 No Content'; return;}
+  rb.innerHTML=colorJson(JSON.stringify(body,null,2));
+  const ht=document.getElementById('hdrTable');
+  ht.innerHTML=Object.entries(hdrs).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join('');
+}
+
+function showToken(tok,p){
+  subTok=tok;
+  document.getElementById('tokenVal').textContent=tok;
+  document.getElementById('tokenPlan').textContent=p+' active';
+  document.getElementById('tokenBar').classList.add('show');
+}
+
+function copyTok(){
+  navigator.clipboard.writeText(subTok).catch(()=>{});
+  const b=document.getElementById('copyBtn');
+  b.textContent='copied';
+  setTimeout(()=>b.textContent='copy',1500);
+}
+
+function getVal(id){return(document.getElementById('p_'+id)||{}).value||''}
+
+// ── Active command + tutorial state ─────────────────────────────
+let activeCmd='mkchap';
+let tutStep=0; // 0=mkchap, 1=mktx, 2=accept, 3=done
+let stepStates={mkchap:'active',mktx:'locked',accept:'locked'};
+
+const TUTORIAL_TEXT = {
+  mkchap: {
+    badge: 'step 1 of 3',
+    html: `<strong style="color:var(--teal)">Step 1 — generate a CHAP.</strong> The server runs <code style="color:var(--teal);font-size:12px">randpay_mkchap</code> on its own emercoind, locking in the amount, risk, and timeout. The CHAP is a single-use challenge — embed it in a <code style="color:var(--teal);font-size:12px">402 X-PAYMENT-REQUIRED</code> response.`,
+  },
+  mktx: {
+    badge: 'step 2 of 3',
+    html: `<strong style="color:var(--teal)">Step 2 — sign the CHAP.</strong> The client runs <code style="color:var(--teal);font-size:12px">randpay_mktx</code> on their own emercoind. This signs the CHAP and builds a probabilistic raw tx. <strong style="color:var(--amber)">No funds move yet</strong> — the tx is held until step 3.`,
+  },
+  accept: {
+    badge: 'step 3 of 3',
+    html: `<strong style="color:var(--teal)">Step 3 — settle.</strong> The server runs <code style="color:var(--teal);font-size:12px">randpay_accept</code>. The probabilistic outcome is determined: <strong style="color:var(--teal)">winner</strong> = tx broadcast + 200 OK. <strong style="color:var(--amber)">non-winner</strong> = 402 with a fresh CHAP, retry from step 1.`,
+  },
+  done_win: {
+    badge: '✓ complete',
+    html: `<strong style="color:var(--teal)">Round complete — you won.</strong> X-Sub-Token issued, subscription active. Click <strong>⟳ Full round</strong> below to see how multiple non-winners chain into one win.`,
+  },
+  done_loss: {
+    badge: '↻ retry',
+    html: `<strong style="color:var(--amber)">Non-winner.</strong> No funds moved. The server returned a fresh CHAP — click <code style="color:var(--teal);font-size:12px">randpay_mkchap</code> to start the next attempt. Or hit <strong>⟳ Full round</strong> to auto-retry until a win.`,
+  },
+};
+
+function setTutorial(key){
+  const t=TUTORIAL_TEXT[key];
+  if(!t) return;
+  document.getElementById('tutStepBadge').textContent=t.badge;
+  document.getElementById('tutorialText').innerHTML=t.html;
+}
+
+function refreshStepButtons(){
+  ['mkchap','mktx','accept'].forEach(name=>{
+    const btn=document.getElementById('btn-'+name);
+    btn.className='step-btn '+stepStates[name];
+  });
+}
+
+function selectCmd(cmd){
+  // Don't allow clicking locked or done buttons
+  if(stepStates[cmd]==='locked' || stepStates[cmd]==='done') return;
+
+  // Mark all current actives as inactive (only one active at a time)
+  Object.keys(stepStates).forEach(k=>{
+    if(stepStates[k]==='active' && k!==cmd) stepStates[k]='locked';
+  });
+  stepStates[cmd]='active';
+  refreshStepButtons();
+
+  activeCmd=cmd;
+  setTutorial(cmd);
+  renderParams(cmd);
+}
+
+function resetSequence(){
+  stepStates={mkchap:'active',mktx:'locked',accept:'locked'};
+  activeCmd='mkchap';
+  tutStep=0;
+  refreshStepButtons();
+  setTutorial('mkchap');
+  renderParams('mkchap');
+}
+
+function advanceSequence(fromCmd){
+  // Mark current step done
+  stepStates[fromCmd]='done';
+  // Activate next step
+  const order=['mkchap','mktx','accept'];
+  const idx=order.indexOf(fromCmd);
+  if(idx < order.length-1){
+    const next=order[idx+1];
+    stepStates[next]='active';
+    activeCmd=next;
+    setTutorial(next);
+    renderParams(next);
+  }
+  refreshStepButtons();
+}
+
+function renderParams(cmd){
+  const c=CMDS[cmd];
+  if(!c) return;
+  const sideColor=c.side==='CLIENT'?'var(--amber)':c.side==='HTTP'?'#7a8be0':'var(--teal)';
+  document.getElementById('pgDesc').innerHTML=
+    `<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+       <code style="font-size:11px;color:var(--text)">${c.rpc}</code>
+       <span style="font-size:9px;padding:2px 6px;border-radius:2px;background:rgba(255,255,255,.06);color:${sideColor};letter-spacing:.05em;font-weight:600">${c.side}</span>
+     </div>${c.desc}`;
+
+  const f=document.getElementById('pgFields');
+  f.innerHTML='';
+  c.params.forEach(pk=>{
+    if(pk==='risk'){f.appendChild(makeRisk());return;}
+    const isLong=pk==='chap'||pk==='rawtx'||pk==='subtoken';
+    const labels={amount:'amount',timeout:'timeout (seconds)',chap:'chap',rawtx:'hexstring (rawtx)',path:'path',xplan:'plan',subtoken:'X-Sub-Token',identity:'identity (optional)'};
+    const types={amount:'EMC float',timeout:'integer',chap:'hex string',rawtx:'raw tx hex',path:'string',xplan:'7d | 30d',subtoken:'hex string',identity:'string'};
+    const defs={amount:PLANS[plan].amount,timeout:PLANS[plan].timeout,chap:lastChap,rawtx:lastRawtx,path:'/api/status',xplan:plan,subtoken:subTok,identity:''};
+    const g=document.createElement('div');g.className='pg-field';
+    g.innerHTML=`<div class="pg-field-label"><span>${labels[pk]}</span><span class="pg-field-type">${types[pk]||''}</span></div>
+      ${isLong?`<textarea class="pg-textarea" id="p_${pk}" placeholder="${labels[pk]}…">${defs[pk]||''}</textarea>`
+              :`<input class="pg-input" id="p_${pk}" value="${defs[pk]||''}" />`}`;
+    f.appendChild(g);
+  });
+}
+
+function onCmd(){ selectCmd(activeCmd); }
+
+function makeRisk(){
+  const r=PLANS[plan].risk;
+  const g=document.createElement('div');
+  g.className='pg-field';
+  g.style.marginBottom='14px';
+  g.innerHTML=`
+    <div class="pg-field-label" style="margin-bottom:8px">
+      <span>settlement frequency <span class="pg-field-type">how often a tx hits the chain</span></span>
+    </div>
+    <div id="riskChips" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
+      <button type="button" class="rchip" data-risk="0.50" onclick="pickRisk(this)" style="padding:10px 8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:11px;cursor:pointer;border-radius:2px;text-align:left;line-height:1.5;transition:all .15s">
+        <div style="font-weight:600;color:var(--text);margin-bottom:2px">⚡ Aggressive</div>
+        <div style="font-size:10px;color:var(--text3)">1 in 2 calls</div>
+      </button>
+      <button type="button" class="rchip" data-risk="0.10" onclick="pickRisk(this)" style="padding:10px 8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:11px;cursor:pointer;border-radius:2px;text-align:left;line-height:1.5;transition:all .15s">
+        <div style="font-weight:600;color:var(--text);margin-bottom:2px">⚖ Balanced</div>
+        <div style="font-size:10px;color:var(--text3)">1 in 10 calls</div>
+      </button>
+      <button type="button" class="rchip" data-risk="0.03" onclick="pickRisk(this)" style="padding:10px 8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:11px;cursor:pointer;border-radius:2px;text-align:left;line-height:1.5;transition:all .15s">
+        <div style="font-weight:600;color:var(--text);margin-bottom:2px">🛡 Efficient</div>
+        <div style="font-size:10px;color:var(--text3)">1 in 33 calls</div>
+      </button>
+    </div>
+    <div id="riskExplain" style="background:var(--bg);border-left:2px solid var(--teal);padding:8px 12px;font-size:10px;line-height:1.7;color:var(--text2);border-radius:0 2px 2px 0">
+      <span id="riskExplainText">pick a preset above</span>
+    </div>
+    <input type="hidden" id="p_risk" value="${r}">
+  `;
+  // Auto-select the chip matching current plan default after attach
+  setTimeout(()=>{
+    const chips=g.querySelectorAll('.rchip');
+    let target=chips[1]; // default to Balanced
+    chips.forEach(c=>{
+      if(Math.abs(parseFloat(c.dataset.risk)-r)<0.005) target=c;
+    });
+    pickRisk(target);
+  },0);
+  return g;
+}
+
+function pickRisk(btn){
+  document.querySelectorAll('.rchip').forEach(c=>{
+    c.style.background='var(--bg3)';
+    c.style.borderColor='var(--border2)';
+    c.querySelector('div:first-child').style.color='var(--text)';
+  });
+  btn.style.background='var(--teal-dim)';
+  btn.style.borderColor='var(--teal)';
+  btn.querySelector('div:first-child').style.color='var(--teal)';
+
+  const r=parseFloat(btn.dataset.risk);
+  document.getElementById('p_risk').value=r;
+
+  const oneIn=Math.round(1/r);
+  const pct=Math.round(r*100);
+  const ratio=Math.round(1/r);
+
+  document.getElementById('riskExplainText').innerHTML=
+    `<span style="color:var(--teal);font-weight:500">risk = ${r.toFixed(2)}</span> · roughly <span style="color:var(--teal)">1 in ${oneIn}</span> randpay tickets produces an on-chain tx. Expected payment per call is identical to deterministic schemes — you just batch settlement across <span style="color:var(--teal)">${ratio}× fewer txs</span>.`;
+}
+
+function getRisk(){
+  const el=document.getElementById('p_risk');
+  return el?parseFloat(el.value):PLANS[plan].risk;
+}
+
+// ── CONSOLE ENGINE ──────────────────────────────────────────────
+const LOG=[];
+let filterMode='all';
+const T0=Date.now();
+let csTotal=0,csWins=0,csLosses=0,csMsArr=[];
+
+function ts(){const ms=Date.now()-T0;return ms<1000?ms+'ms':(ms/1000).toFixed(1)+'s';}
+
+function clog(tag,msg,category='rpc'){
+  const entry={tag,msg,category,time:ts()};
+  LOG.push(entry);
+  renderLine(entry);
+  updateStats();
+}
+
+function renderLine(e){
+  const cb=document.getElementById('consoleBody');
+  const empty=document.getElementById('consoleEmpty');
+  if(empty)empty.remove();
+  if(filterMode!=='all'&&e.category!==filterMode)return;
+  const div=document.createElement('div');
+  div.className='cline';
+  div.dataset.cat=e.category;
+  div.innerHTML=`<span class="ctime">${e.time}</span><span class="ctag ctag-${e.tag}">${e.tag}</span><span class="cmsg">${e.msg}</span>`;
+  cb.appendChild(div);
+  cb.scrollTop=cb.scrollHeight;
+}
+
+function setFilter(f,btn){
+  filterMode=f;
+  document.querySelectorAll('.console-ctrl').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const cb=document.getElementById('consoleBody');
+  cb.innerHTML='';
+  const filtered=f==='all'?LOG:LOG.filter(e=>e.category===f);
+  if(!filtered.length){cb.innerHTML='<div class="console-empty" style="padding:40px 0">no entries for this filter</div>';return;}
+  filtered.forEach(renderLine);
+}
+
+function clearConsole(){
+  LOG.length=0;csTotal=0;csWins=0;csLosses=0;csMsArr=[];
+  document.getElementById('consoleBody').innerHTML='<div class="console-empty" id="consoleEmpty">awaiting execution — run a command above</div>';
+  ['csTotal','csWins','csLosses'].forEach(id=>document.getElementById(id).textContent='0');
+  document.getElementById('csWinRate').textContent='—';
+  document.getElementById('csAvgMs').textContent='—';
+}
+
+function updateStats(){
+  const total=csWins+csLosses;  // total = accept outcomes only; always consistent
+  document.getElementById('csTotal').textContent=total||csTotal;
+  document.getElementById('csWins').textContent=csWins;
+  document.getElementById('csLosses').textContent=csLosses;
+  const rounds=csWins+csLosses;
+  document.getElementById('csWinRate').textContent=rounds?Math.round(csWins/rounds*100)+'%':'—';
+  document.getElementById('csAvgMs').textContent=csMsArr.length?Math.round(csMsArr.reduce((a,b)=>a+b,0)/csMsArr.length)+'ms':'—';
+}
+
+// ── EXECUTE (single step, advances the sequence) ─────────────────
+async function execute(){
+  const k=activeCmd;
+  if(!k || stepStates[k]==='locked'){ return; }
+
+  const btn=document.getElementById('execBtn');
+  btn.innerHTML='<span class="spin">⟳</span>running…';
+  btn.className='exec-btn loading';
+  btn.disabled=true;
+  await sleep(280+Math.random()*250);
+  const p=PLANS[plan];
+  const t=rnd(180);
+  const live=document.getElementById('liveMode').checked;
+  const baseUrl=document.getElementById('baseUrl').value.replace(/\/$/,'');
+
+  try{
+    if(k==='mkchap'){
+      // Try live if enabled
+      let chap=null, isLive=false;
+      if(live){
+        const r=await tryFetch(`${baseUrl}/chap/${plan}`, {}, 1500);
+        if(r && r.ok){
+          try{ const j=await r.json(); chap=j.chap; isLive=!!chap; }catch(_){}
+        }
+      }
+      if(!chap) chap=hex(64);
+      lastChap=chap;
+      clog('send',`randpay_mkchap ${p.amount} ${getRisk().toFixed(2)} ${p.timeout}  <span class="di">→ ${isLive?'<span class="hi">LIVE server</span>':'sim'}</span>`,'rpc');
+      setResp(200,'RPC randpay_mkchap',chap,{'content-type':'application/json','x-emc-node':'emercoind/0.9.23',...(isLive?{'x-source':'live'}:{})},t);
+      document.getElementById('respBody').innerHTML=`<span class="js">"${chap}"</span>`;
+      setStep(1);
+      clog('ok',`CHAP <span class="hi">${chap.slice(0,16)}…${chap.slice(-6)}</span>  <span class="di">(${t}ms${isLive?' · live':''})</span>`,'rpc');
+      advanceSequence('mkchap');
+    }
+    else if(k==='mktx'){
+      const rawtx=hex(256);lastRawtx=rawtx;
+      clog('send',`randpay_mktx "${(lastChap||'').slice(0,12)||'&lt;chap&gt;'}…" ${p.timeout}  <span class="di">→ client emercoind (sim)</span>`,'rpc');
+      setResp(200,'RPC randpay_mktx',null,{'content-type':'application/json'},t);
+      document.getElementById('respBody').innerHTML=`<span class="js">"${rawtx.slice(0,52)}…"</span>`;
+      setStep(2);
+      clog('ok',`rawtx <span class="hi">${rawtx.slice(0,18)}…</span>  <span class="di">(${t}ms · ${rawtx.length/2}B · funds locked, not broadcast)</span>`,'rpc');
+      advanceSequence('mktx');
+    }
+    else if(k==='accept'){
+      csTotal++;
+      const risk=getRisk();
+      let win=null, isLive=false;
+
+      // Try real POST /pay first if live mode
+      if(live){
+        const r=await tryFetch(`${baseUrl}/pay`, {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({plan, rawtx:lastRawtx, identity:null})
+        }, 1500);
+        if(r){
+          isLive=true;
+          if(r.status===204){
+            win=true;
+            const tok=r.headers.get('x-sub-token');
+            if(tok) subTok=tok;
+          } else if(r.status===402){
+            const j=await r.json().catch(()=>({}));
+            win = j.winner===true ? true : false;
+          }
+        }
+      }
+      // Fallback: AUTHENTIC random based on actual risk value
+      // win probability = risk (matches "1 in N" framing where N=1/risk)
+      if(win===null) win = Math.random() < risk;
+
+      clog('send',`randpay_accept "${(lastRawtx||'').slice(0,16)||'&lt;rawtx&gt;'}…"  <span class="di">→ ${isLive?'<span class="hi">LIVE</span>':'sim'} · win prob = ${risk.toFixed(2)}</span>`,'rpc');
+
+      if(win){
+        csWins++;
+        if(!subTok) subTok=hex(48);
+        showToken(subTok,plan);
+        setStep(4);
+        setResp(200,'RPC randpay_accept',true,{'content-type':'application/json',...(isLive?{'x-source':'live','x-sub-token':subTok}:{})},t);
+        document.getElementById('respBody').innerHTML=`<span class="jb">true</span>`;
+        clog('win',`<span class="hi">WINNER</span> — tx broadcast  <span class="di">(${t}ms${isLive?' · live':''})</span>`,'result');
+        clog('win',`X-Sub-Token <span class="hi">${subTok.slice(0,24)}…</span>  plan=<span class="am">${plan}</span>  ttl=<span class="am">${p.ttl}d</span>`,'result');
+        // mark accept done, show win tutorial
+        stepStates.accept='done';
+        refreshStepButtons();
+        setTutorial('done_win');
+      } else {
+        csLosses++;
+        lastChap='';
+        setResp(200,'RPC randpay_accept',false,{'content-type':'application/json'},t);
+        document.getElementById('respBody').innerHTML=`<span class="jb">false</span>  <span style="color:var(--text3)">// non-winner — restart from mkchap</span>`;
+        setStep(0);
+        clog('loss',`<span class="am">non-winner</span> — no funds moved  <span class="di">(${t}ms${isLive?' · live':''})</span>`,'result');
+        clog('info',`fresh CHAP needed — sequence reset`,'result');
+        // Reset sequence to mkchap for retry
+        resetSequence();
+        setTutorial('done_loss');
+      }
+      updateStats();
+    }
+  } catch(err){
+    clog('err',`exec error — ${err.message}`,'result');
+  } finally {
+    btn.className='exec-btn';
+    btn.innerHTML='Execute step →';
+    btn.disabled=false;
+  }
+}
+
+// ── FULL ROUND WIZARD — fixed: short timeout, real risk, no freeze ──
+function wizSay(msg){
+  const el=document.getElementById('wizStatus');
+  el.style.display='block'; el.innerHTML=msg;
+}
+function wizDone(){document.getElementById('wizStatus').style.display='none';}
+
+// Try a real fetch; return null on failure or timeout (max 1.5s)
+async function tryFetch(url, opts={}, timeoutMs=1500){
+  const ctrl=new AbortController();
+  const id=setTimeout(()=>ctrl.abort(), timeoutMs);
+  try {
+    const r=await fetch(url,{...opts,signal:ctrl.signal});
+    clearTimeout(id);
+    return r;
+  } catch(e){ clearTimeout(id); return null; }
+}
+
+async function runFullRound(){
+  const btn=document.getElementById('wizBtn');
+  const execBtn=document.getElementById('execBtn');
+  btn.disabled=true; execBtn.disabled=true;
+  btn.textContent='running…';
+
+  const p=PLANS[plan];
+  const baseUrl=document.getElementById('baseUrl').value.replace(/\/$/,'');
+  const live=document.getElementById('liveMode').checked;
+  const risk=getRisk();
+  const expected=Math.round(1/risk*10)/10;
+
+  let attempt=0;
+  const maxAttempts=Math.max(20, Math.ceil(expected*5)); // scale with risk
+
+  let roundWins=0, roundLosses=0;
+  const roundMs=[];
+
+  // Reset visual sequence state
+  resetSequence();
+
+  clog('info',`<span class="hi">── FULL ROUND</span>  plan=<span class="am">${plan}</span>  win prob=<span class="am">${risk.toFixed(2)}</span>  mode=<span class="hi">${live?'LIVE':'sim'}</span>  expected ~${expected} attempts`,'result');
+
+  try {
+    while(attempt < maxAttempts){
+      attempt++;
+      const roundStart=Date.now();
+      wizSay(`attempt <strong>${attempt}</strong> — mkchap…`);
+
+      // ── STEP 1: mkchap ──
+      let chap=null, live1=false;
+      if(live){
+        const r1=await tryFetch(`${baseUrl}/chap/${plan}`, {}, 1500);
+        if(r1 && r1.ok){
+          try{ const j=await r1.json(); chap=j.chap; live1=!!chap; }catch(_){}
+        }
+      }
+      if(!chap) chap=hex(64);
+      lastChap=chap;
+      const t1=rnd(120);
+
+      clog('send',`[${attempt}] randpay_mkchap → ${live1?'<span class="hi">LIVE</span>':'sim'}  CHAP <span class="hi">${chap.slice(0,14)}…</span>  <span class="di">(${t1}ms)</span>`,'rpc');
+      setResp(200,'RPC randpay_mkchap',chap,{'content-type':'application/json'},t1);
+      document.getElementById('respBody').innerHTML=`<span class="js">"${chap.slice(0,48)}…"</span>`;
+      stepStates.mkchap='done'; stepStates.mktx='active';
+      refreshStepButtons();
+      setStep(1);
+      await sleep(180);
+
+      // ── STEP 2: mktx ──
+      wizSay(`attempt <strong>${attempt}</strong> — mktx…`);
+      const rawtx=hex(256); lastRawtx=rawtx;
+      const t2=rnd(160);
+
+      clog('send',`[${attempt}] randpay_mktx → sim  rawtx <span class="hi">${rawtx.slice(0,16)}…</span>  <span class="di">(${t2}ms · funds locked)</span>`,'rpc');
+      setResp(200,'RPC randpay_mktx',null,{'content-type':'application/json'},t2);
+      document.getElementById('respBody').innerHTML=`<span class="js">"${rawtx.slice(0,52)}…"</span>`;
+      stepStates.mktx='done'; stepStates.accept='active';
+      refreshStepButtons();
+      setStep(2);
+      await sleep(180);
+
+      // ── STEP 3: accept ──
+      wizSay(`attempt <strong>${attempt}</strong> — accept…`);
+      let win=null, live3=false, t3=rnd(140);
+
+      if(live){
+        const r3=await tryFetch(`${baseUrl}/pay`, {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({plan, rawtx, identity:null})
+        }, 1500);
+        if(r3){
+          live3=true;
+          if(r3.status===204){
+            win=true;
+            const tok=r3.headers.get('x-sub-token');
+            if(tok) subTok=tok;
+          } else if(r3.status===402){
+            const j=await r3.json().catch(()=>({}));
+            win = j.winner===true ? true : false;
+          }
+        }
+      }
+      // AUTHENTIC: win probability = configured risk value
+      if(win===null) win = Math.random() < risk;
+
+      const dur=Date.now()-roundStart;
+      roundMs.push(dur);
+      await sleep(150);
+
+      if(win){
+        roundWins++; csWins++;
+        if(!subTok) subTok=hex(48);
+        showToken(subTok,plan); setStep(4);
+        setResp(200,'RPC randpay_accept',true,{'content-type':'application/json'},t3);
+        document.getElementById('respBody').innerHTML=`<span class="jb">true</span>`;
+        clog('win',`[${attempt}] <span class="hi">WINNER</span>  tx broadcast  <span class="di">(${t3}ms${live3?' · live':''})</span>`,'result');
+        clog('win',`X-Sub-Token <span class="hi">${subTok.slice(0,24)}…</span>  plan=<span class="am">${plan}</span>`,'result');
+        clog('info',`<span class="hi">── DONE</span>  ${attempt} attempt${attempt>1?'s':''} · ${attempt-1} non-winner${attempt-1!==1?'s':''}  total ${dur}ms`,'result');
+        stepStates.accept='done';
+        refreshStepButtons();
+        setTutorial('done_win');
+        wizDone();
+        break;
+      } else {
+        roundLosses++; csLosses++;
+        lastChap='';
+        setResp(200,'RPC randpay_accept',false,{'content-type':'application/json'},t3);
+        document.getElementById('respBody').innerHTML=`<span class="jb">false</span>  <span style="color:var(--text3)">// non-winner · retrying…</span>`;
+        clog('loss',`[${attempt}] <span class="am">non-winner</span> — no funds moved  <span class="di">(${t3}ms${live3?' · live':''})</span>`,'result');
+        // Reset for next attempt
+        stepStates={mkchap:'active',mktx:'locked',accept:'locked'};
+        refreshStepButtons();
+        setStep(0);
+        await sleep(220);
+      }
+
+      const totalRounds=roundWins+roundLosses;
+      csTotal=totalRounds;
+      csMsArr=roundMs;
+      updateStats();
+    }
+
+    if(attempt>=maxAttempts && roundWins===0){
+      clog('err',`stopped after ${maxAttempts} attempts at win prob ${risk.toFixed(2)} — try a higher frequency preset`,'result');
+      wizDone();
+    }
+
+  } finally {
+    csTotal=roundWins+roundLosses;
+    csMsArr=roundMs;
+    updateStats();
+    btn.disabled=false; execBtn.disabled=false;
+    btn.textContent='⟳ Full round';
+  }
+}
+
+
+// update stat
+document.getElementById('statTx').textContent=Math.round(PLANS[plan].risk*100)+'%';
+resetSequence();
+
+// nav active on scroll
+const sections=document.querySelectorAll('section[id]');
+const navLinks=document.querySelectorAll('.nav-link[href^="#"]');
+window.addEventListener('scroll',()=>{
+  let cur='';
+  sections.forEach(s=>{if(window.scrollY>=s.offsetTop-80)cur=s.id;});
+  navLinks.forEach(a=>{a.classList.toggle('active',a.getAttribute('href')==='#'+cur);});
+},{passive:true});
+</script>
+</body>
+</html>
