@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tableau de Bord Magique - Contrats Intelligents</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body { 
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+    color: #ffffff; 
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+}
+.card { 
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.2) 100%); 
+    border-radius: 1rem; 
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.5);
+}
+.btn { 
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+.btn:hover { 
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+.btn:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s;
+}
+.btn:hover:before {
+    left: 100%;
+}
+pre { 
+    background: rgba(0, 0, 0, 0.3); 
+    padding: 1rem; 
+    border-radius: 0.5rem; 
+    overflow-x: auto;
+    border-left: 4px solid #f093fb;
+}
+.table-header { 
+    background: linear-gradient(45deg, rgba(240, 147, 251, 0.3) 0%, rgba(245, 87, 108, 0.3) 100%);
+}
+.table-row:hover { 
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.01);
+}
+h1, h2 {
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    background: linear-gradient(45deg, #f093fb, #f5576c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.emoji-rain {
+    animation: fall 3s linear infinite;
+}
+@keyframes fall {
+    0% { transform: translateY(-100px); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(100vh); opacity: 0; }
+}
+.pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .5; }
+}
+</style>
+</head>
+<body class="font-sans min-h-screen">
+<div class="emoji-rain absolute inset-0 pointer-events-none">
+    <span style="position: absolute; left: 10%; animation-delay: 0s;">🌟</span>
+    <span style="position: absolute; left: 20%; animation-delay: 0.5s;">✨</span>
+    <span style="position: absolute; left: 30%; animation-delay: 1s;">🎉</span>
+    <span style="position: absolute; left: 40%; animation-delay: 1.5s;">🎊</span>
+    <span style="position: absolute; left: 50%; animation-delay: 2s;">🌈</span>
+    <span style="position: absolute; left: 60%; animation-delay: 2.5s;">💫</span>
+    <span style="position: absolute; left: 70%; animation-delay: 3s;">🎯</span>
+    <span style="position: absolute; left: 80%; animation-delay: 3.5s;">🎪</span>
+    <span style="position: absolute; left: 90%; animation-delay: 4s;">🎨</span>
+</div>
+
+<header class="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6 flex justify-between items-center shadow-2xl relative z-10">
+    <h1 class="text-4xl font-bold flex items-center gap-3">
+        <span class="emoji-rain">🎪</span>
+        Tableau de Bord Magique des Contrats Intelligents
+        <span class="emoji-rain">✨</span>
+    </h1>
+    <div class="flex gap-4 items-center">
+        <span class="pulse bg-green-400 text-green-900 px-3 py-1 rounded-full text-sm font-bold">EN DIRECT</span>
+        <button id="refreshBtn" class="btn text-white px-6 py-3 rounded-full shadow-lg font-bold flex items-center gap-2">
+            <span>🔄</span> Actualiser Magiquement
+        </button>
+    </div>
+</header>
+
+<main class="p-8 grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10">
+    <section class="card p-6 lg:col-span-3">
+        <h2 class="text-3xl font-bold mb-4 flex items-center gap-2">
+            <span>🎯</span> Contrats Intelligents Actifs
+            <span class="text-xl font-normal text-yellow-300">(Total: <span id="contractCount">0</span>)</span>
+        </h2>
+        <div class="relative">
+            <input type="text" id="contractFilter" placeholder="🔍 Filtrer par ID ou participant..." 
+                   class="w-full p-4 mb-4 rounded-full bg-white/20 backdrop-blur text-white placeholder-white/70 border border-white/30 focus:outline-none focus:ring-4 focus:ring-pink-400 transition-all">
+            <table class="min-w-full text-lg">
+                <thead class="table-header text-white">
+                    <tr>
+                        <th class="p-3 text-left">🆔 ID</th>
+                        <th class="p-3 text-left">📊 Statut</th>
+                        <th class="p-3 text-left">⏰ Limite Coin Hours</th>
+                        <th class="p-3 text-left">👥 Participants</th>
+                        <th class="p-3 text-left">📋 Template CID</th>
+                    </tr>
+                </thead>
+                <tbody id="contracts-table" class="text-white"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="card p-6">
+        <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+            <span>🎲</span> Victoires Randpay Récentes
+            <span class="text-sm font-normal text-yellow-300 animate-pulse">🎰 JACKPOT!</span>
+        </h2>
+        <ul id="randpay-wins" class="space-y-3 h-64 overflow-y-auto mb-4"></ul>
+        <canvas id="randpay-chart" class="h-48"></canvas>
+    </section>
+
+    <section class="card p-6">
+        <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+            <span>⚡</span> Consommation d'Énergie Coin Hours
+            <span class="text-sm font-normal text-green-300">⚡ Électrique!</span>
+        </h2>
+        <canvas id="coinhours-chart" class="h-48"></canvas>
+    </section>
+
+    <section class="card p-6">
+        <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+            <span>📤</span> Transactions NESS Prêtes
+            <span class="text-sm font-normal text-blue-300">🚀 Décollage!</span>
+        </h2>
+        <ul id="ness-txs" class="space-y-3 h-64 overflow-y-auto"></ul>
+    </section>
+
+    <section class="card p-6">
+        <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+            <span>🎭</span> Statut d'Exécution des Scripts
+            <span class="text-sm font-normal text-purple-300">🎪 Spectacle!</span>
+        </h2>
+        <ul id="script-status" class="space-y-3 h-64 overflow-y-auto"></ul>
+    </section>
+
+    <section class="card p-6 lg:col-span-3">
+        <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+            <span>📜</span> Journal des Événements en Direct
+            <span class="text-sm font-normal text-orange-300 animate-pulse">🔥 EN DIRECT!</span>
+        </h2>
+        <pre id="runtime-logs" class="text-green-300 font-mono text-sm max-h-64 overflow-y-auto"></pre>
+    </section>
+</main>
+
+<footer class="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6 text-center mt-8">
+    <p class="text-lg font-bold flex items-center justify-center gap-2">
+        <span>🌈</span> Créé avec amour et beaucoup de couleurs par votre assistant préféré
+        <span>💖</span>
+    </p>
+    <p class="text-sm mt-2 opacity-80">© 2026 - Tableau de Bord Magique - Tous droits réservés avec un sourire 😊</p>
+</footer>
+
+<script>
+let randpayChart=null; let coinHoursChart=null;
+
+function updateRandpayChart(labels,data){
+    const ctx=document.getElementById('randpay-chart').getContext('2d'); 
+    if(randpayChart){
+        randpayChart.data.labels=labels; 
+        randpayChart.data.datasets[0].data=data; 
+        randpayChart.update();
+    } else{
+        randpayChart=new Chart(ctx,{
+            type:'bar',
+            data:{
+                labels:labels,
+                datasets:[{
+                    label:'🎲 Pourcentage de Victoire',
+                    data:data,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.8)',
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 206, 86, 0.8)',
+                        'rgba(75, 192, 192, 0.8)',
+                        'rgba(153, 102, 255, 0.8)',
+                        'rgba(255, 159, 64, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options:{
+                responsive:true,
+                scales:{
+                    y:{beginAtZero:true,max:100}
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: 'white',
+                            font: {
+                                size: 14
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+}
+
+function updateCoinHoursChart(labels,data){
+    const ctx=document.getElementById('coinhours-chart').getContext('2d'); 
+    if(coinHoursChart){
+        coinHoursChart.data.labels=labels; 
+        coinHoursChart.data.datasets[0].data=data; 
+        coinHoursChart.update();
+    } else{
+        coinHoursChart=new Chart(ctx,{
+            type:'line',
+            data:{
+                labels:labels,
+                datasets:[{
+                    label:'⚡ Coin Hours Utilisées',
+                    data:data,
+                    fill:true,
+                    backgroundColor:'rgba(147, 51, 234, 0.3)',
+                    borderColor:'rgb(147, 51, 234)',
+                    tension:0.4,
+                    pointBackgroundColor: 'rgb(147, 51, 234)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgb(147, 51, 234)'
+                }]
+            },
+            options:{
+                responsive:true,
+                scales:{
+                    y:{beginAtZero:true}
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: 'white',
+                            font: {
+                                size: 14
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+}
+
+async function fetchContracts(){
+    try {
+        const res=await fetch('http://127.0.0.1:8000/api/contracts');
+        const data=await res.json();
+        const tbody=document.getElementById('contracts-table');
+        const filter=document.getElementById('contractFilter').value.toLowerCase();
+        tbody.innerHTML='';
+        
+        document.getElementById('contractCount').textContent = data.length;
+        
+        data.forEach(c=>{
+            if(c.contract_id.toLowerCase().includes(filter)||c.parties.payer.toLowerCase().includes(filter)||c.parties.payee.toLowerCase().includes(filter)){
+                const parties=`👤 Payer: ${c.parties.payer}, 💼 Payee: ${c.parties.payee}`;
+                const statusEmoji = c.status==='paused'?'⏸️':c.status==='completed'?'✅':'🟢';
+                const bgClass=c.status==='paused'?'bg-yellow-600/30':c.status==='completed'?'bg-gray-600/30':'bg-green-600/30';
+                tbody.innerHTML+=`<tr class="table-row ${bgClass} transition-all hover:scale-105">
+                    <td class="p-3 font-bold">${c.contract_id}</td>
+                    <td class="p-3">${statusEmoji} ${c.status}</td>
+                    <td class="p-3">⏰ ${c.coin_hour_limit}</td>
+                    <td class="p-3">${parties}</td>
+                    <td class="p-3 font-mono text-sm">${c.template_cid}</td>
+                </tr>`;
+            }
+        });
+    } catch (error) {
+        console.error('Erreur lors de la récupération des contrats:', error);
+    }
+}
+
+async function fetchRandpayWins(){
+    try {
+        const res=await fetch('http://127.0.0.1:8000/api/randpay_wins');
+        const data=await res.json();
+        const ul=document.getElementById('randpay-wins');
+        ul.innerHTML='';
+        const labels=[]; const probs=[];
+        data.forEach(win=>{
+            ul.innerHTML+=`<li class="p-3 bg-white/10 backdrop-blur rounded-lg shadow-sm hover:bg-white/20 transition-all">
+                <div class="font-bold">🎯 ${win.contract_id}</div>
+                <div class="text-sm">🎫 Ticket: ${win.ticket_hash}</div>
+                <div class="text-sm">💰 Montant: ${win.amount}</div>
+                <div class="text-sm text-yellow-300">🎲 Prob: ${(win.prob*100).toFixed(6)}%</div>
+            </li>`;
+            labels.push(win.contract_id+'-'+win.ticket_seq);
+            probs.push(win.prob*100);
+        });
+        updateRandpayChart(labels,probs);
+    } catch (error) {
+        console.error('Erreur lors de la récupération des victoires Randpay:', error);
+    }
+}
+
+async function fetchCoinHours(){
+    try {
+        const res=await fetch('http://127.0.0.1:8000/api/coinhours');
+        const data=await res.json();
+        const labels=data.map(d=>d.contract_id);
+        const values=data.map(d=>d.used);
+        updateCoinHoursChart(labels,values);
+    } catch (error) {
+        console.error('Erreur lors de la récupération des Coin Hours:', error);
+    }
+}
+
+async function fetchNESS_Txs(){
+    try {
+        const res=await fetch('http://127.0.0.1:8000/api/ness_txs');
+        const data=await res.json();
+        const ul=document.getElementById('ness-txs');
+        ul.innerHTML='';
+        data.forEach(tx=>{
+            ul.innerHTML+=`<li class="p-3 bg-white/10 backdrop-blur rounded-lg shadow-sm hover:bg-white/20 transition-all">
+                <div class="font-bold">📤 ${tx.contract_id} → ${tx.to}</div>
+                <div class="text-sm">💰 Montant: ${tx.amount}</div>
+                <div class="text-sm">✍️ Signé: ${tx.signature?'✅':'❌'}</div>
+                ${tx.signature?`<button class="mt-2 bg-gradient-to-r from-green-400 to-blue-500 text-white px-4 py-2 rounded-full hover:scale-105 transition-all" onclick="broadcastNESS('${tx.txid}')">🚀 Diffuser</button>`:''}
+            </li>`;
+        });
+    } catch (error) {
+        console.error('Erreur lors de la récupération des transactions NESS:', error);
+    }
+}
+
+async function fetchScriptStatus(){
+    try {
+        const res=await fetch('http://127.0.0.1:8000/api/script_status');
+        const data=await res.json();
+        const ul=document.getElementById('script-status');
+        ul.innerHTML='';
+        data.forEach(s=>{
+            const statusEmoji=s.status==='success'?'✅':'❌';
+            const color=s.status==='success'?'text-green-400':'text-red-400';
+            ul.innerHTML+=`<li class="p-3 bg-white/10 backdrop-blur rounded-lg shadow-sm hover:bg-white/20 transition-all">
+                <div class="${color} font-bold">${statusEmoji} [${s.status.toUpperCase()}]</div>
+                <div class="text-sm">📋 ${s.contract_id}</div>
+                <div class="text-sm font-mono">🎭 ${s.script_cid}</div>
+            </li>`;
+        });
+    } catch (error) {
+        console.error('Erreur lors de la récupération du statut des scripts:', error);
+    }
+}
+
+async function fetchLogs(){
+    try {
+        const res=await fetch('http://127.0.0.1:8000/api/logs');
+        const data=await res.text();
+        document.getElementById('runtime-logs').textContent=data;
+    } catch (error) {
+        console.error('Erreur lors de la récupération des logs:', error);
+    }
+}
+
+async function broadcastNESS(txid){
+    try {
+        await fetch(`http://127.0.0.1:8000/api/broadcast_ness/${txid}`,{method:'POST'});
+        alert(`🚀 Transaction ${txid} demandée pour diffusion !`);
+    } catch (error) {
+        console.error('Erreur lors de la diffusion de la transaction:', error);
+        alert('❌ Erreur lors de la diffusion de la transaction');
+    }
+}
+
+async function refreshDashboard(){
+    await Promise.all([
+        fetchContracts(),
+        fetchRandpayWins(),
+        fetchCoinHours(),
+        fetchNESS_Txs(),
+        fetchScriptStatus(),
+        fetchLogs()
+    ]);
+}
+
+document.getElementById('refreshBtn').addEventListener('click',refreshDashboard);
+document.getElementById('contractFilter').addEventListener('input',fetchContracts);
+
+setInterval(refreshDashboard,3000);
+refreshDashboard();
+</script>
+</body>
+</html>

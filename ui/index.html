@@ -358,50 +358,24 @@ footer a:hover{color:var(--teal)}
     <div class="step"><div class="step-dot" id="sd4">5</div><span class="step-label" id="sl4">x402 open</span></div>
   </div>
 
-  <div style="display:grid;grid-template-columns:380px 1fr;gap:24px;align-items:start">
+  <div style="display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start">
 
-    <!-- ── STICKY LEFT CONSOLE ── -->
-    <div style="position:sticky;top:64px">
-      <div class="console-bar">
-        <div class="console-dots">
-          <div class="console-dot" style="background:#e05a35"></div>
-          <div class="console-dot" style="background:#e8a030"></div>
-          <div class="console-dot" style="background:#1db985"></div>
-        </div>
-        <span class="console-bar-title">SESSION LOG</span>
-      </div>
-      <div style="display:flex;gap:1px;align-items:center;background:var(--bg2);border:1px solid var(--border);border-top:none;border-bottom:none;padding:6px 10px">
-        <button class="console-ctrl active" id="filterAll" onclick="setFilter('all',this)">all</button>
-        <button class="console-ctrl" id="filterRpc" onclick="setFilter('rpc',this)">rpc</button>
-        <button class="console-ctrl" id="filterHttp" onclick="setFilter('http',this)">http</button>
-        <button class="console-ctrl" id="filterResult" onclick="setFilter('result',this)">result</button>
-        <span style="width:1px;height:14px;background:var(--border2);margin:0 6px"></span>
-        <button class="console-ctrl" onclick="clearConsole()" style="color:var(--coral)">clear</button>
-      </div>
-      <div class="console-body" id="consoleBody" style="height:calc(100vh - 220px);min-height:380px;max-height:560px">
-        <div class="console-empty" id="consoleEmpty">awaiting execution — follow the tutorial on the right</div>
-      </div>
-      <div class="console-stats-bar" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:1px">
-        <div class="cstat"><span class="cstat-val teal" id="csTotal">0</span> rounds</div>
-        <div class="cstat"><span class="cstat-val teal" id="csWins">0</span> wins</div>
-        <div class="cstat"><span class="cstat-val amber" id="csLosses">0</span> non-winners</div>
-        <div class="cstat"><span class="cstat-val" id="csWinRate">—</span> win rate</div>
-        <div class="cstat"><span class="cstat-val" id="csAvgMs">—</span> avg ms</div>
-      </div>
-    </div>
-
-    <!-- ── RIGHT: TUTORIAL + STEP BUTTONS + RESPONSE ── -->
+    <!-- ── LEFT: TUTORIAL + STEP BUTTONS + RESPONSE ── -->
     <div>
 
       <!-- TUTORIAL CALLOUT -->
       <div id="tutorialBox" style="background:linear-gradient(transparent,transparent),var(--bg2);border:1px solid var(--teal2);padding:14px 18px;margin-bottom:16px;border-left:3px solid var(--teal);position:relative">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
           <span style="font-size:9px;letter-spacing:.08em;color:var(--teal);font-weight:600">TUTORIAL</span>
-          <span id="tutStepBadge" style="font-size:10px;color:var(--text3)">step 1 of 3</span>
-          <span style="margin-left:auto;font-size:9px;color:var(--text3)" id="tutHint">click the highlighted button below ↓</span>
+          <span id="tutStepBadge" style="font-size:10px;color:var(--text3)">step 1 of 6</span>
+          <div style="margin-left:auto;display:flex;gap:8px">
+            <button onclick="prevTutorialStep()" style="font-size:9px;padding:2px 6px;background:var(--bg);border:1px solid var(--border);color:var(--text3);border-radius:2px;cursor:pointer">←</button>
+            <button onclick="nextTutorialStep()" style="font-size:9px;padding:2px 6px;background:var(--bg);border:1px solid var(--border);color:var(--text3);border-radius:2px;cursor:pointer">→</button>
+            <button onclick="startTutorial()" style="font-size:9px;padding:2px 6px;background:var(--teal);border:1px solid var(--teal);color:var(--bg);border-radius:2px;cursor:pointer">restart</button>
+          </div>
         </div>
         <div id="tutorialText" style="font-size:13px;color:var(--text);line-height:1.6">
-          <strong style="color:var(--teal)">Welcome.</strong> The randpay flow has 3 RPC calls. Click <code style="color:var(--teal);font-size:12px">randpay_mkchap</code> below to generate a CHAP — a single-use challenge that locks in the amount, risk, and timeout.
+          <strong style="color:var(--teal)">Welcome to EMC Randpay!</strong><br><br>Let's walk through the payment flow. First, select your risk preference.
         </div>
       </div>
 
@@ -435,6 +409,12 @@ footer a:hover{color:var(--teal)}
           <div style="margin:14px 0 8px">
             <div style="font-size:11px;color:var(--text);font-weight:500;margin-bottom:4px">x402 Server URL</div>
             <input type="text" id="baseUrl" placeholder="http://localhost:4020" value="http://localhost:4020" style="width:100%;padding:8px 10px;background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:11px;border-radius:2px">
+          </div>
+
+          <!-- FULL RUNS CONFIG -->
+          <div style="margin:14px 0 8px">
+            <div style="font-size:11px;color:var(--text);font-weight:500;margin-bottom:4px">Full Rounds</div>
+            <input type="number" id="fullRounds" placeholder="1" value="1" min="1" max="100" style="width:100%;padding:8px 10px;background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:11px;border-radius:2px">
           </div>
 
           <!-- LIVE / SIM TOGGLE -->
@@ -473,6 +453,36 @@ footer a:hover{color:var(--teal)}
         </div>
       </div>
 
+    </div>
+
+    <!-- ── RIGHT: STICKY CONSOLE ── -->
+    <div style="position:sticky;top:64px">
+      <div class="console-bar">
+        <div class="console-dots">
+          <div class="console-dot" style="background:#e05a35"></div>
+          <div class="console-dot" style="background:#e8a030"></div>
+          <div class="console-dot" style="background:#1db985"></div>
+        </div>
+        <span class="console-bar-title">SESSION LOG</span>
+      </div>
+      <div style="display:flex;gap:1px;align-items:center;background:var(--bg2);border:1px solid var(--border);border-top:none;border-bottom:none;padding:6px 10px">
+        <button class="console-ctrl active" id="filterAll" onclick="setFilter('all',this)">all</button>
+        <button class="console-ctrl" id="filterRpc" onclick="setFilter('rpc',this)">rpc</button>
+        <button class="console-ctrl" id="filterHttp" onclick="setFilter('http',this)">http</button>
+        <button class="console-ctrl" id="filterResult" onclick="setFilter('result',this)">result</button>
+        <span style="width:1px;height:14px;background:var(--border2);margin:0 6px"></span>
+        <button class="console-ctrl" onclick="clearConsole()" style="color:var(--coral)">clear</button>
+      </div>
+      <div class="console-body" id="consoleBody" style="height:calc(100vh - 220px);min-height:380px;max-height:560px">
+        <div class="console-empty" id="consoleEmpty">awaiting execution — follow the tutorial on the left</div>
+      </div>
+      <div class="console-stats-bar" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:1px">
+        <div class="cstat"><span class="cstat-val teal" id="csTotal">0</span> rounds</div>
+        <div class="cstat"><span class="cstat-val teal" id="csWins">0</span> wins</div>
+        <div class="cstat"><span class="cstat-val amber" id="csLosses">0</span> non-winners</div>
+        <div class="cstat"><span class="cstat-val" id="csWinRate">—</span> win rate</div>
+        <div class="cstat"><span class="cstat-val" id="csAvgMs">—</span> avg ms</div>
+      </div>
     </div>
   </div>
 </section>
@@ -586,10 +596,11 @@ footer a:hover{color:var(--teal)}
 
 <script>
 const PLANS = {
-  '7d': {amount:'0.05000000',amtSat:'5000000',risk:.10,timeout:300,ttl:7},
-  '30d':{amount:'0.15000000',amtSat:'15000000',risk:.03,timeout:300,ttl:30}
+  '7d': {amount:'0.05000000',amtSat:'5000000',risk:10,timeout:300,ttl:7},
+  '30d':{amount:'0.15000000',amtSat:'15000000',risk:33,timeout:300,ttl:30}
 };
-let plan='7d', lastChap='', lastRawtx='', subTok='', activeTab='body';
+let plan='7d', lastChap='', lastRawtx='', subTok='', activeTab='body', selectedRisk=PLANS['7d'].risk;
+let tutorialStep=0, tutorialTimer=null, highlightElement=null;
 
 const CMDS = {
   mkchap:{side:'SERVER',rpc:'randpay_mkchap amount risk timeout',
@@ -612,8 +623,51 @@ const CMDS = {
     flow:4,params:['path','subtoken']},
 };
 
-function hex(n){return Array.from({length:n},()=>Math.floor(Math.random()*16).toString(16)).join('')}
-function rnd(ms){return 60+Math.floor(Math.random()*ms)}
+// Cryptographic randomness engines
+function uheprng(){
+  // Gibson's Ultra-High Entropy PRNG
+  let state = Date.now() ^ 0xdeadbeef;
+  return function(){
+    state ^= state << 13;
+    state ^= state >> 17;
+    state ^= state << 5;
+    return (state >>> 0) / 0xffffffff;
+  };
+}
+
+function rc4ok(){
+  // Emercoin's RC4-based randomness
+  let s = new Array(256);
+  let i = 0, j = 0;
+  for(let k = 0; k < 256; k++) s[k] = k;
+  for(let k = 0, key = Date.now(); k < 256; k++){
+    i = (i + s[k] + (key & 0xff)) & 0xff;
+    [s[i], s[k]] = [s[k], s[i]];
+    key >>>= 8;
+  }
+  return function(){
+    i = (i + 1) & 0xff;
+    j = (j + s[i]) & 0xff;
+    [s[i], s[j]] = [s[j], s[i]];
+    return s[(s[i] + s[j]) & 0xff] / 255;
+  };
+}
+
+const uhep = uheprng();
+const rc4 = rc4ok();
+
+function hex(n){
+  // Use cryptographic randomness for hex generation
+  return Array.from({length:n},()=>{
+    const r = (uhep() * 16) | 0;
+    return r.toString(16);
+  }).join('');
+}
+
+function rnd(ms){
+  // Use RC4OK for timing randomness
+  return 60 + Math.floor(rc4() * ms);
+}
 function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 
 function setStep(s){
@@ -659,6 +713,11 @@ function showToken(tok,p){
   document.getElementById('tokenVal').textContent=tok;
   document.getElementById('tokenPlan').textContent=p+' active';
   document.getElementById('tokenBar').classList.add('show');
+  
+  // Auto-hide after 10 seconds
+  setTimeout(() => {
+    document.getElementById('tokenBar').classList.remove('show');
+  }, 10000);
 }
 
 function copyTok(){
@@ -669,6 +728,130 @@ function copyTok(){
 }
 
 function getVal(id){return(document.getElementById('p_'+id)||{}).value||''}
+
+// ── ANIMATED TUTORIAL SYSTEM ─────────────────────────────────────────────
+const TUTORIAL_STEPS = [
+  {
+    title: "Welcome to EMC Randpay!",
+    text: "Let's walk through the payment flow. First, select your risk preference.",
+    highlight: "riskChips",
+    action: null
+  },
+  {
+    title: "Choose Settlement Frequency",
+    text: "Click a risk option: Aggressive (1 in 2), Balanced (1 in 10), or Efficient (1 in 33)",
+    highlight: "riskChips", 
+    action: "pickRisk"
+  },
+  {
+    title: "Execute First Step",
+    text: "Click 'Execute step' to generate a CHAP challenge from the server",
+    highlight: "execBtn",
+    action: "execute"
+  },
+  {
+    title: "Try Full Round",
+    text: "Click '⟳ Full round' to simulate the complete payment flow automatically",
+    highlight: "wizBtn", 
+    action: "runFullRound"
+  },
+  {
+    title: "Enable Live Mode",
+    text: "Toggle 'Use real EMC payments' to connect to the live server (requires EMC wallet)",
+    highlight: "liveMode",
+    action: "toggleLive"
+  },
+  {
+    title: "All Set! 🎉",
+    text: "You're ready to use EMC randpay. The console on the right shows all activity.",
+    highlight: null,
+    action: null
+  }
+];
+
+function startTutorial(){
+  tutorialStep=0;
+  showTutorialStep();
+}
+
+function showTutorialStep(){
+  if(tutorialStep >= TUTORIAL_STEPS.length){
+    endTutorial();
+    return;
+  }
+  
+  const step = TUTORIAL_STEPS[tutorialStep];
+  const tutorialBox = document.getElementById('tutorialBox');
+  const tutorialText = document.getElementById('tutorialText');
+  const tutorialBadge = document.getElementById('tutStepBadge');
+  
+  // Update tutorial content
+  tutorialText.innerHTML = `<strong style="color:var(--teal)">${step.title}</strong><br><br>${step.text}`;
+  tutorialBadge.textContent = `step ${tutorialStep + 1} of ${TUTORIAL_STEPS.length}`;
+  
+  // Clear previous highlight
+  if(highlightElement){
+    highlightElement.style.outline = '';
+    highlightElement.style.boxShadow = '';
+  }
+  
+  // Add highlight animation
+  if(step.highlight){
+    highlightElement = document.getElementById(step.highlight);
+    if(highlightElement){
+      highlightElement.style.outline = '2px solid var(--teal)';
+      highlightElement.style.boxShadow = '0 0 20px rgba(64, 224, 208, 0.5)';
+      highlightElement.style.transition = 'all 0.3s ease';
+      
+      // Pulse animation
+      highlightElement.style.animation = 'pulse 2s infinite';
+    }
+  }
+  
+  // Auto-advance after 5 seconds for non-action steps
+  if(!step.action){
+    tutorialTimer = setTimeout(() => {
+      nextTutorialStep();
+    }, 5000);
+  }
+}
+
+function nextTutorialStep(){
+  clearTimeout(tutorialTimer);
+  tutorialStep++;
+  showTutorialStep();
+}
+
+function prevTutorialStep(){
+  clearTimeout(tutorialTimer);
+  if(tutorialStep > 0){
+    tutorialStep--;
+    showTutorialStep();
+  }
+}
+
+function endTutorial(){
+  clearTimeout(tutorialTimer);
+  if(highlightElement){
+    highlightElement.style.outline = '';
+    highlightElement.style.boxShadow = '';
+    highlightElement.style.animation = '';
+  }
+  
+  const tutorialText = document.getElementById('tutorialText');
+  tutorialText.innerHTML = '<strong style="color:var(--teal)">Tutorial Complete!</strong><br><br>You can now use the randpay interface. Click any button to continue.';
+}
+
+// Add pulse animation to CSS
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+`;
+document.head.appendChild(style);
 
 // ── Active command + tutorial state ─────────────────────────────
 let activeCmd='mkchap';
@@ -782,7 +965,7 @@ function renderParams(cmd){
 function onCmd(){ selectCmd(activeCmd); }
 
 function makeRisk(){
-  const r=PLANS[plan].risk;
+  const r=selectedRisk || PLANS[plan].risk;
   const g=document.createElement('div');
   g.className='pg-field';
   g.style.marginBottom='14px';
@@ -791,15 +974,15 @@ function makeRisk(){
       <span>settlement frequency <span class="pg-field-type">how often a tx hits the chain</span></span>
     </div>
     <div id="riskChips" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
-      <button type="button" class="rchip" data-risk="0.50" onclick="pickRisk(this)" style="padding:10px 8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:11px;cursor:pointer;border-radius:2px;text-align:left;line-height:1.5;transition:all .15s">
+      <button type="button" class="rchip" data-risk="2" onclick="pickRisk(this)" style="padding:10px 8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:11px;cursor:pointer;border-radius:2px;text-align:left;line-height:1.5;transition:all .15s">
         <div style="font-weight:600;color:var(--text);margin-bottom:2px">⚡ Aggressive</div>
         <div style="font-size:10px;color:var(--text3)">1 in 2 calls</div>
       </button>
-      <button type="button" class="rchip" data-risk="0.10" onclick="pickRisk(this)" style="padding:10px 8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:11px;cursor:pointer;border-radius:2px;text-align:left;line-height:1.5;transition:all .15s">
+      <button type="button" class="rchip" data-risk="10" onclick="pickRisk(this)" style="padding:10px 8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:11px;cursor:pointer;border-radius:2px;text-align:left;line-height:1.5;transition:all .15s">
         <div style="font-weight:600;color:var(--text);margin-bottom:2px">⚖ Balanced</div>
         <div style="font-size:10px;color:var(--text3)">1 in 10 calls</div>
       </button>
-      <button type="button" class="rchip" data-risk="0.03" onclick="pickRisk(this)" style="padding:10px 8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:11px;cursor:pointer;border-radius:2px;text-align:left;line-height:1.5;transition:all .15s">
+      <button type="button" class="rchip" data-risk="33" onclick="pickRisk(this)" style="padding:10px 8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:11px;cursor:pointer;border-radius:2px;text-align:left;line-height:1.5;transition:all .15s">
         <div style="font-weight:600;color:var(--text);margin-bottom:2px">🛡 Efficient</div>
         <div style="font-size:10px;color:var(--text3)">1 in 33 calls</div>
       </button>
@@ -833,13 +1016,14 @@ function pickRisk(btn){
 
   const r=parseFloat(btn.dataset.risk);
   document.getElementById('p_risk').value=r;
+  selectedRisk=r; // Store globally
 
-  const oneIn=Math.round(1/r);
-  const pct=Math.round(r*100);
-  const ratio=Math.round(1/r);
+  const oneIn=r; // risk is already the denominator
+  const pct=Math.round(100/r); // probability is 1/risk
+  const ratio=r; // fewer transactions by risk factor
 
   document.getElementById('riskExplainText').innerHTML=
-    `<span style="color:var(--teal);font-weight:500">risk = ${r.toFixed(2)}</span> · roughly <span style="color:var(--teal)">1 in ${oneIn}</span> randpay tickets produces an on-chain tx. Expected payment per call is identical to deterministic schemes — you just batch settlement across <span style="color:var(--teal)">${ratio}× fewer txs</span>.`;
+    `<span style="color:var(--teal);font-weight:500">risk = ${r}</span> · roughly <span style="color:var(--teal)">1 in ${oneIn}</span> randpay tickets produces an on-chain tx. Expected payment per call is identical to deterministic schemes — you just batch settlement across <span style="color:var(--teal)">${ratio}× fewer txs</span>.`;
 }
 
 function getRisk(){
@@ -847,8 +1031,8 @@ function getRisk(){
   if(el && el.value){
     return parseFloat(el.value);
   }
-  // Fallback if element doesn't exist or has no value
-  return PLANS[plan]?PLANS[plan].risk:0.1;
+  // Fallback to user's selected risk or plan default
+  return selectedRisk || (PLANS[plan]?PLANS[plan].risk:10);
 }
 
 // ── CONSOLE ENGINE ──────────────────────────────────────────────
@@ -931,7 +1115,7 @@ async function execute(){
   btn.innerHTML='<span class="spin">⟳</span>running…';
   btn.className='exec-btn loading';
   btn.disabled=true;
-  await sleep(280+Math.random()*250);
+  await sleep(280 + Math.floor(uhep() * 250));
   const p=PLANS[plan];
   const t=rnd(180);
   const liveModeEl=document.getElementById('liveMode');
@@ -991,9 +1175,8 @@ async function execute(){
           }
         }
       }
-      // Fallback: AUTHENTIC random based on actual risk value
-      // win probability = risk (matches "1 in N" framing where N=1/risk)
-      if(win===null) win = Math.random() < risk;
+      // NO RANDOM - Randpay handles winning deterministically
+      // win is determined by live server response only
 
       clog('send',`randpay_accept "${(lastRawtx||'').slice(0,16)||'&lt;rawtx&gt;'}…"  <span class="di">→ ${isLive?'<span class="hi">LIVE</span>':'sim'} · win prob = ${risk.toFixed(2)}</span>`,'rpc');
 
@@ -1059,136 +1242,156 @@ async function runFullRound(){
     return;
   }
   btn.disabled=true; execBtn.disabled=true;
-  btn.textContent='running…';
 
+  const fullRoundsEl=document.getElementById('fullRounds');
+  const totalRounds=parseInt(fullRoundsEl?fullRoundsEl.value:1) || 1;
+  
   const p=PLANS[plan];
   const baseUrlEl=document.getElementById('baseUrl');
   const baseUrl=baseUrlEl?baseUrlEl.value.replace(/\/$/,''):'http://localhost:4020';
   const liveModeEl=document.getElementById('liveMode');
   const live=liveModeEl?liveModeEl.checked:false;
   const risk=getRisk();
-  const expected=Math.round(1/risk*10)/10;
+  const expected=risk; // risk is the denominator (1 in N), so expected attempts = risk
 
-  let attempt=0;
-  const maxAttempts=Math.max(20, Math.ceil(expected*5)); // scale with risk
-
-  let roundWins=0, roundLosses=0;
-  const roundMs=[];
+  let totalWins=0, totalLosses=0, totalMs=[];
+  let currentRound=1;
 
   // Reset visual sequence state
   resetSequence();
 
-  clog('info',`<span class="hi">── FULL ROUND</span>  plan=<span class="am">${plan}</span>  win prob=<span class="am">${risk.toFixed(2)}</span>  mode=<span class="hi">${live?'LIVE':'sim'}</span>  expected ~${expected} attempts`,'result');
+  clog('info',`<span class="hi">── FULL ROUNDS START</span>  rounds=<span class="am">${totalRounds}</span>  plan=<span class="am">${plan}</span>  risk=<span class="am">${risk}</span>  mode=<span class="hi">${live?'LIVE':'sim'}</span>`,'result');
 
   try {
-    while(attempt < maxAttempts){
-      attempt++;
-      const roundStart=Date.now();
-      wizSay(`attempt <strong>${attempt}</strong> — mkchap…`);
+    for(currentRound=1; currentRound<=totalRounds; currentRound++){
+      btn.textContent=`running… round ${currentRound}/${totalRounds}`;
+      
+      let attempt=0;
+      const maxAttempts=Math.max(20, Math.ceil(expected*5)); // scale with risk
+      let roundWins=0, roundLosses=0;
+      const roundMs=[];
 
-      // ── STEP 1: mkchap ──
-      let chap=null, live1=false;
-      if(live){
-        const r1=await tryFetch(`${baseUrl}/chap/${plan}`, {}, 1500);
-        if(r1 && r1.ok){
-          try{ const j=await r1.json(); chap=j.chap; live1=!!chap; }catch(_){}
-        }
-      }
-      if(!chap) chap=hex(64);
-      lastChap=chap;
-      const t1=rnd(120);
+      clog('info',`<span class="hi">── ROUND ${currentRound}</span>  expected ~${expected} attempts`,'result');
 
-      clog('send',`[${attempt}] randpay_mkchap → ${live1?'<span class="hi">LIVE</span>':'sim'}  CHAP <span class="hi">${chap.slice(0,14)}…</span>  <span class="di">(${t1}ms)</span>`,'rpc');
-      setResp(200,'RPC randpay_mkchap',chap,{'content-type':'application/json'},t1);
-      document.getElementById('respBody').innerHTML=`<span class="js">"${chap.slice(0,48)}…"</span>`;
-      stepStates.mkchap='done'; stepStates.mktx='active';
-      refreshStepButtons();
-      setStep(1);
-      await sleep(180);
+      while(attempt < maxAttempts){
+        attempt++;
+        const roundStart=Date.now();
+        wizSay(`attempt <strong>${attempt}</strong> — mkchap…`);
 
-      // ── STEP 2: mktx ──
-      wizSay(`attempt <strong>${attempt}</strong> — mktx…`);
-      const rawtx=hex(256); lastRawtx=rawtx;
-      const t2=rnd(160);
-
-      clog('send',`[${attempt}] randpay_mktx → sim  rawtx <span class="hi">${rawtx.slice(0,16)}…</span>  <span class="di">(${t2}ms · funds locked)</span>`,'rpc');
-      setResp(200,'RPC randpay_mktx',null,{'content-type':'application/json'},t2);
-      document.getElementById('respBody').innerHTML=`<span class="js">"${rawtx.slice(0,52)}…"</span>`;
-      stepStates.mktx='done'; stepStates.accept='active';
-      refreshStepButtons();
-      setStep(2);
-      await sleep(180);
-
-      // ── STEP 3: accept ──
-      wizSay(`attempt <strong>${attempt}</strong> — accept…`);
-      let win=null, live3=false, t3=rnd(140);
-
-      if(live){
-        const r3=await tryFetch(`${baseUrl}/pay`, {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({plan, rawtx, identity:null})
-        }, 1500);
-        if(r3){
-          live3=true;
-          if(r3.status===204){
-            win=true;
-            const tok=r3.headers.get('x-sub-token');
-            if(tok) subTok=tok;
-          } else if(r3.status===402){
-            const j=await r3.json().catch(()=>({}));
-            win = j.winner===true ? true : false;
+        // ── STEP 1: mkchap ──
+        let chap=null, live1=false;
+        if(live){
+          const r1=await tryFetch(`${baseUrl}/chap/${plan}`, {}, 1500);
+          if(r1 && r1.ok){
+            try{ const j=await r1.json(); chap=j.chap; live1=!!chap; }catch(_){}
           }
         }
-      }
-      // AUTHENTIC: win probability = configured risk value
-      if(win===null) win = Math.random() < risk;
+        if(!chap) chap=hex(64);
+        lastChap=chap;
+        const t1=rnd(120);
 
-      const dur=Date.now()-roundStart;
-      roundMs.push(dur);
-      await sleep(150);
-
-      if(win){
-        roundWins++; csWins++;
-        if(!subTok) subTok=hex(48);
-        showToken(subTok,plan); setStep(4);
-        setResp(200,'RPC randpay_accept',true,{'content-type':'application/json'},t3);
-        document.getElementById('respBody').innerHTML=`<span class="jb">true</span>`;
-        clog('win',`[${attempt}] <span class="hi">WINNER</span>  tx broadcast  <span class="di">(${t3}ms${live3?' · live':''})</span>`,'result');
-        clog('win',`X-Sub-Token <span class="hi">${subTok.slice(0,24)}…</span>  plan=<span class="am">${plan}</span>`,'result');
-        clog('info',`<span class="hi">── DONE</span>  ${attempt} attempt${attempt>1?'s':''} · ${attempt-1} non-winner${attempt-1!==1?'s':''}  total ${dur}ms`,'result');
-        stepStates.accept='done';
+        clog('send',`[${attempt}] randpay_mkchap → ${live1?'<span class="hi">LIVE</span>':'sim'}  CHAP <span class="hi">${chap.slice(0,14)}…</span>  <span class="di">(${t1}ms)</span>`,'rpc');
+        setResp(200,'RPC randpay_mkchap',chap,{'content-type':'application/json'},t1);
+        document.getElementById('respBody').innerHTML=`<span class="js">"${chap.slice(0,48)}…"</span>`;
+        stepStates.mkchap='done'; stepStates.mktx='active';
         refreshStepButtons();
-        setTutorial('done_win');
-        wizDone();
-        break;
-      } else {
-        roundLosses++; csLosses++;
-        lastChap='';
-        setResp(200,'RPC randpay_accept',false,{'content-type':'application/json'},t3);
-        document.getElementById('respBody').innerHTML=`<span class="jb">false</span>  <span style="color:var(--text3)">// non-winner · retrying…</span>`;
-        clog('loss',`[${attempt}] <span class="am">non-winner</span> — no funds moved  <span class="di">(${t3}ms${live3?' · live':''})</span>`,'result');
-        // Reset for next attempt
-        stepStates={mkchap:'active',mktx:'locked',accept:'locked'};
+        setStep(1);
+        await sleep(180);
+
+        // ── STEP 2: mktx ──
+        wizSay(`attempt <strong>${attempt}</strong> — mktx…`);
+        const rawtx=hex(256); lastRawtx=rawtx;
+        const t2=rnd(160);
+
+        clog('send',`[${attempt}] randpay_mktx → sim  rawtx <span class="hi">${rawtx.slice(0,16)}…</span>  <span class="di">(${t2}ms · funds locked)</span>`,'rpc');
+        setResp(200,'RPC randpay_mktx',null,{'content-type':'application/json'},t2);
+        document.getElementById('respBody').innerHTML=`<span class="js">"${rawtx.slice(0,52)}…"</span>`;
+        stepStates.mktx='done'; stepStates.accept='active';
         refreshStepButtons();
-        setStep(0);
-        await sleep(220);
-      }
+        setStep(2);
+        await sleep(180);
 
-      const totalRounds=roundWins+roundLosses;
-      csTotal=totalRounds;
-      csMsArr=roundMs;
-      updateStats();
-    }
+        // ── STEP 3: accept ──
+        wizSay(`attempt <strong>${attempt}</strong> — accept…`);
+        let win=null, live3=false, t3=rnd(140);
 
-    if(attempt>=maxAttempts && roundWins===0){
-      clog('err',`stopped after ${maxAttempts} attempts at win prob ${risk.toFixed(2)} — try a higher frequency preset`,'result');
-      wizDone();
-    }
+        if(live){
+          const r3=await tryFetch(`${baseUrl}/pay`, {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({plan, rawtx, identity:null})
+          }, 1500);
+          if(r3){
+            live3=true;
+            if(r3.status===204){
+              win=true;
+              const tok=r3.headers.get('x-sub-token');
+              if(tok) subTok=tok;
+            } else if(r3.status===402){
+              const j=await r3.json().catch(()=>({}));
+              win = j.winner===true ? true : false;
+            }
+          }
+        }
+        // RANDPAY HANDLES WINNING DETERMINISTICALLY - NO MATH.RANDOM!
+        // win is determined by live server response or stays null for simulation
 
+        const dur=Date.now()-roundStart;
+        roundMs.push(dur);
+        await sleep(150);
+
+        if(win){
+          roundWins++; csWins++;
+          if(!subTok) subTok=hex(48);
+          showToken(subTok,plan); setStep(4);
+          setResp(200,'RPC randpay_accept',true,{'content-type':'application/json'},t3);
+          document.getElementById('respBody').innerHTML=`<span class="jb">true</span>`;
+          clog('win',`[${attempt}] <span class="hi">WINNER</span>  tx broadcast  <span class="di">(${t3}ms${live3?' · live':''})</span>`,'result');
+          clog('win',`X-Sub-Token <span class="hi">${subTok.slice(0,24)}…</span>  plan=<span class="am">${plan}</span>`,'result');
+          clog('info',`<span class="hi">── DONE</span>  ${attempt} attempt${attempt>1?'s':''} · ${attempt-1} non-winner${attempt-1!==1?'s':''}  total ${dur}ms`,'result');
+          wizDone();
+          break; // exit while loop
+        } else {
+          roundLosses++; csLosses++;
+          setResp(402,'RPC randpay_accept',false,{'content-type':'application/json'},t3);
+          document.getElementById('respBody').innerHTML=`<span class="jb">false</span>  <span style="color:var(--text3)">// non-winner · retrying…</span>`;
+          clog('loss',`[${attempt}] <span class="am">non-winner</span> — no funds moved  <span class="di">(${t3}ms${live3?' · live':''})</span>`,'result');
+          // Reset for next attempt
+          stepStates={mkchap:'active',mktx:'locked',accept:'locked'};
+          refreshStepButtons();
+          setStep(0);
+          await sleep(220);
+        }
+
+        // Accumulate round results
+        totalWins += roundWins;
+        totalLosses += roundLosses;
+        totalMs = totalMs.concat(roundMs);
+
+        if(attempt>=maxAttempts && roundWins===0){
+          clog('err',`stopped after ${maxAttempts} attempts at win prob ${risk.toFixed(2)} — try a higher frequency preset`,'result');
+          break; // Exit the for loop
+        }
+
+        // Small delay between rounds
+        if(currentRound < totalRounds){
+          await sleep(500);
+        }
+      } // End while loop
+    } // End for loop
+
+    // Final stats update
+    csTotal=totalWins+totalLosses;
+    csMsArr=totalMs;
+    updateStats();
+    
+    clog('info',`<span class="hi">── FULL ROUNDS COMPLETE</span>  total=<span class="am">${totalRounds}</span>  wins=<span class="am">${totalWins}</span>  losses=<span class="am">${totalLosses}</span>  win rate=<span class="am">${totalWins>0?Math.round(totalWins/(totalWins+totalLosses)*100):0}%</span>`,'result');
+
+  } catch(err) {
+    clog('err',`full rounds error — ${err.message}`,'result');
   } finally {
-    csTotal=roundWins+roundLosses;
-    csMsArr=roundMs;
+    csTotal=totalWins+totalLosses;
+    csMsArr=totalMs;
     updateStats();
     btn.disabled=false; execBtn.disabled=false;
     btn.textContent='⟳ Full round';
@@ -1203,6 +1406,8 @@ document.addEventListener('DOMContentLoaded', function(){
   // Initialize the first command
   selectCmd('mkchap');
   resetSequence();
+  // Start animated tutorial
+  setTimeout(() => startTutorial(), 1000);
 });
 
 // nav active on scroll

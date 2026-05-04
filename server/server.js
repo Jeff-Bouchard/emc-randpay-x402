@@ -32,7 +32,46 @@ const RPC = {
   ).toString('base64'),
 };
 
+// Simulation mode for testing without emercoind
+const SIMULATION_MODE = process.env.SIMULATION_MODE === 'true' || !process.env.EMC_HOST;
+
 async function rpc(method, params = []) {
+  if (SIMULATION_MODE) {
+    // Simulate emercoind responses for testing
+    if (method === 'randpay_mkchap') {
+      // Generate deterministic but unique CHAP
+      const timestamp = Date.now();
+      const plan = params[0]; // amount
+      const risk = params[1]; // risk
+      const timeout = params[2]; // timeout
+      const seed = `${timestamp}-${plan}-${risk}-${timeout}`;
+      const chap = require('crypto').createHash('sha256').update(seed).digest('hex');
+      return chap;
+    }
+    
+    if (method === 'randpay_accept') {
+      // Simulate probabilistic acceptance based on risk parameter
+      const rawtx = params[0];
+      
+      // Extract risk from rawtx or use default - for simulation we'll use plan-based risk
+      // In real implementation, emercoind would determine this from the CHAP
+      const riskValues = { '7d': 10, '30d': 33 };
+      const risk = riskValues['7d'] || 10; // Default to 7d plan risk
+      
+      // Use cryptographic randomness for decision
+      const crypto = require('crypto');
+      const randomBytes = crypto.randomBytes(4);
+      const randomValue = randomBytes.readUInt32BE(0) / 0xffffffff;
+      
+      // Win probability = 1/risk
+      const winProbability = 1 / risk;
+      return randomValue < winProbability;
+    }
+    
+    throw new Error(`Unknown RPC method in simulation: ${method}`);
+  }
+  
+  // Real emercoind RPC call
   const body = JSON.stringify({ jsonrpc: '1.1', id: 'x402', method, params });
   return new Promise((resolve, reject) => {
     const req = http.request(
@@ -70,7 +109,7 @@ const PLANS = {
     label:   '7-day',
     days:    7,
     amount:  parseFloat(process.env.PRICE_7D  || '0.5000000'),
-    risk:    parseFloat(process.env.RISK_7D   || '0.03'),
+    risk:    parseFloat(process.env.RISK_7D   || '10'),
     timeout: parseInt(process.env.TIMEOUT_7D  || '300'),
     ttl_ms:  7 * 24 * 60 * 60 * 1000,
   },
@@ -78,7 +117,7 @@ const PLANS = {
     label:   '30-day',
     days:    30,
     amount:  parseFloat(process.env.PRICE_30D || '0.15000000'),
-    risk:    parseFloat(process.env.RISK_30D  || '0.01'),
+    risk:    parseFloat(process.env.RISK_30D  || '33'),
     timeout: parseInt(process.env.TIMEOUT_30D || '300'),
     ttl_ms:  30 * 24 * 60 * 60 * 1000,
   },

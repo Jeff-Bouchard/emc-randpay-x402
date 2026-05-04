@@ -1,0 +1,13 @@
+{
+  "name": "randpay-e2e-tests",
+  "version": "1.0.0",
+  "description": "Zero-trust end-to-end tests for EMC Randpay",
+  "scripts": {
+    "test": "node randpay-e2e.test.js",
+    "test:watch": "node randpay-e2e.test.js && echo 'Watching for changes...'",
+    "validate": "node randpay-e2e.test.js && echo '✅ All validations passed!'"
+  },
+  "keywords": ["randpay", "emc", "emercoin", "x402", "test"],
+  "author": "Zero-Trust Validation",
+  "license": "MIT"
+}

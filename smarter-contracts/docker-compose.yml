@@ -1,0 +1,38 @@
+#version: '3.9'
+
+services:
+  smarter:
+    build: .
+    container_name: smarter_contracts
+    ports:
+      - "8043:8043"
+    environment:
+      - EMC_RPC_URL=http://127.0.0.1:6662
+      - EMC_RPC_USER=rpcuser
+      - EMC_RPC_PASS=rpcpass
+      - NESS_RPC_URL=http://127.0.0.1:6660
+#      - NESS_RPC_USER=nessuser
+#      - NESS_RPC_PASS=nesspass
+    depends_on:
+      - emercoin
+      - ness
+
+  emercoin:
+    image: nessnetwork/emercoin-core
+    container_name: emercoin
+    ports:
+      - "6662:6662"
+    volumes:
+      - emercoin_data:/emercoin
+
+  ness:
+    image: nessnetwork/privateness
+    container_name: ness
+    ports:
+      - "6660:6660"
+    volumes:
+      - ness_data:/ness
+
+volumes:
+  emercoin_data:
+  ness_data:

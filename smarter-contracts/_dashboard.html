@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smarter Contracts Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body { background-color: #1f2029; color: #e5e7eb; } .card { background-color: #2a2b38; border-radius: 0.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.6); } .btn { transition: all 0.2s; } .btn:hover { transform: translateY(-2px); } pre { background-color: #11121a; padding: 0.5rem; border-radius: 0.5rem; overflow-x: auto; } .table-header { background-color: #11121a; } .table-row:hover { background-color: #3a3b4f; }
+</style>
+</head>
+<body class="font-sans">
+<header class="bg-gray-900 text-white p-4 flex justify-between items-center shadow-lg">
+<h1 class="text-2xl font-bold">🔥 Smarter Contracts Dashboard 🔥</h1>
+<button id="refreshBtn" class="btn bg-blue-600 px-4 py-1 rounded shadow hover:bg-blue-700">Refresh Now</button>
+</header>
+<main class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+<section class="card p-4 lg:col-span-3">
+<h2 class="text-xl font-semibold mb-2">Active Smarter Contracts</h2>
+<input type="text" id="contractFilter" placeholder="Filter by ID or party..." class="w-full p-2 mb-2 rounded bg-gray-800 text-white">
+<table class="min-w-full text-sm">
+<thead class="table-header text-gray-300">
+<tr><th class="p-2 text-left">ID</th><th class="p-2 text-left">Status</th><th class="p-2 text-left">Coin Hour Limit</th><th class="p-2 text-left">Parties</th><th class="p-2 text-left">Template CID</th></tr>
+</thead>
+<tbody id="contracts-table"></tbody>
+</table>
+</section>
+<section class="card p-4">
+<h2 class="text-xl font-semibold mb-2">Recent Randpay Wins</h2>
+<ul id="randpay-wins" class="space-y-2 h-64 overflow-y-auto mb-4"></ul>
+<canvas id="randpay-chart"></canvas>
+</section>
+<section class="card p-4">
+<h2 class="text-xl font-semibold mb-2">Coin Hours Consumption</h2>
+<canvas id="coinhours-chart" class="h-64"></canvas>
+</section>
+<section class="card p-4">
+<h2 class="text-xl font-semibold mb-2">Prepared NESS Transactions</h2>
+<ul id="ness-txs" class="space-y-2 h-64 overflow-y-auto"></ul>
+</section>
+<section class="card p-4">
+<h2 class="text-xl font-semibold mb-2">Script Execution Status</h2>
+<ul id="script-status" class="space-y-2 h-64 overflow-y-auto"></ul>
+</section>
+<section class="card p-4 lg:col-span-3">
+<h2 class="text-xl font-semibold mb-2">Runtime Logs</h2>
+<pre id="runtime-logs"></pre>
+</section>
+</main>
+<script>
+let randpayChart=null; let coinHoursChart=null;
+function updateRandpayChart(labels,data){const ctx=document.getElementById('randpay-chart').getContext('2d'); if(randpayChart){randpayChart.data.labels=labels; randpayChart.data.datasets[0].data=data; randpayChart.update();} else{randpayChart=new Chart(ctx,{type:'bar',data:{labels:labels,datasets:[{label:'Randpay Win %',data:data,backgroundColor:'#facc15'}]},options:{responsive:true,scales:{y:{beginAtZero:true,max:100}}}});}}
+function updateCoinHoursChart(labels,data){const ctx=document.getElementById('coinhours-chart').getContext('2d'); if(coinHoursChart){coinHoursChart.data.labels=labels; coinHoursChart.data.datasets[0].data=data; coinHoursChart.update();} else{coinHoursChart=new Chart(ctx,{type:'line',data:{labels:labels,datasets:[{label:'Coin Hours Used',data:data,fill:true,backgroundColor:'rgba(59,130,246,0.3)',borderColor:'#3b82f6'}]},options:{responsive:true,scales:{y:{beginAtZero:true}}}});}}
+async function fetchContracts(){const res=await fetch('http://127.0.0.1:8000/api/contracts');const data=await res.json();const tbody=document.getElementById('contracts-table');const filter=document.getElementById('contractFilter').value.toLowerCase();tbody.innerHTML='';data.forEach(c=>{if(c.contract_id.toLowerCase().includes(filter)||c.parties.payer.toLowerCase().includes(filter)||c.parties.payee.toLowerCase().includes(filter)){const parties=`Payer: ${c.parties.payer}, Payee: ${c.parties.payee}`;const bgClass=c.status==='paused'?'bg-yellow-700':c.status==='completed'?'bg-gray-800':'';tbody.innerHTML+=`<tr class="table-row ${bgClass}"><td class="p-2">${c.contract_id}</td><td class="p-2">${c.status}</td><td class="p-2">${c.coin_hour_limit}</td><td class="p-2">${parties}</td><td class="p-2">${c.template_cid}</td></tr>`}})}
+async function fetchRandpayWins(){const res=await fetch('http://127.0.0.1:8000/api/randpay_wins');const data=await res.json();const ul=document.getElementById('randpay-wins');ul.innerHTML='';const labels=[];const probs=[];data.forEach(win=>{ul.innerHTML+=`<li class="p-2 bg-gray-800 rounded shadow-sm">${win.contract_id} - Ticket: ${win.ticket_hash} - Amount: ${win.amount} - Prob: ${(win.prob*100).toFixed(6)}%</li>`;labels.push(win.contract_id+'-'+win.ticket_seq);probs.push(win.prob*100);});updateRandpayChart(labels,probs);}
+async function fetchCoinHours(){const res=await fetch('http://127.0.0.1:8000/api/coinhours');const data=await res.json();const labels=data.map(d=>d.contract_id);const values=data.map(d=>d.used);updateCoinHoursChart(labels,values);}
+async function fetchNESS_Txs(){const res=await fetch('http://127.0.0.1:8000/api/ness_txs');const data=await res.json();const ul=document.getElementById('ness-txs');ul.innerHTML='';data.forEach(tx=>{ul.innerHTML+=`<li class="p-2 bg-gray-800 rounded shadow-sm flex justify-between"><span>${tx.contract_id} → ${tx.to} | Amount: ${tx.amount} | Signed: ${tx.signature?'Yes':'No'}</span>${tx.signature?`<button class="bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700" onclick="broadcastNESS('${tx.txid}')">Broadcast</button>`:''}</li>`});}
+async function fetchScriptStatus(){const res=await fetch('http://127.0.0.1:8000/api/script_status');const data=await res.json();const ul=document.getElementById('script-status');ul.innerHTML='';data.forEach(s=>{const color=s.status==='success'?'text-green-400':'text-red-500';ul.innerHTML+=`<li class="p-2 bg-gray-800 rounded shadow-sm"><span class="${color}">[${s.status.toUpperCase()}]</span> ${s.contract_id} - ${s.script_cid}</li>`});}
+async function fetchLogs(){const res=await fetch('http://127.0.0.1:8000/api/logs');const data=await res.text();document.getElementById('runtime-logs').textContent=data;}
+async function broadcastNESS(txid){await fetch(`http://127.0.0.1:8000/api/broadcast_ness/${txid}`,{method:'POST'});alert(`Transaction ${txid} broadcast requested`);}
+async function refreshDashboard(){await fetchContracts();await fetchRandpayWins();await fetchCoinHours();await fetchNESS_Txs();await fetchScriptStatus();await fetchLogs();}
+document.getElementById('refreshBtn').addEventListener('click',refreshDashboard);
+document.getElementById('contractFilter').addEventListener('input',fetchContracts);
+setInterval(refreshDashboard,3000); refreshDashboard();
+</script>
+</body>
+</html>
