@@ -25,7 +25,7 @@ separate broadcast step. `false` is a valid non-winning ticket — server return
 with a fresh CHAP embedded, client retries immediately. Expected value is preserved
 across the full distribution of requests.
 
-At `risk=0.01`: 100 requests produce 1 on-chain transaction on average, at the same
+At `risk=100`: 100 requests produce 1 on-chain transaction on average, at the same
 expected EMC revenue as 100 exact payments.
 
 ## Why existing schemes don't suffice

@@ -68,8 +68,8 @@ and returns it base64-encoded in the `X-PAYMENT-REQUIRED` header alongside the 4
 | `asset` | string | MUST be `"EMC"` |
 | `payTo` | string | Server's EMC receiving address |
 | `extra.chap` | string | Hex string returned by `randpay_mkchap`. Single-use. |
-| `extra.risk` | number | Probability server does NOT collect on a given ticket (0–1). |
-| `extra.expected` | string | Expected value per call in EMC satoshi: `floor(amount × (1 - risk))`. Informational. |
+| `extra.risk` | number | "1 in N" chance server does NOT collect on a given ticket (integer N≥2). |
+| `extra.expected` | string | Expected value per call in EMC satoshi: `floor(amount × (1 - 1/risk))`. Informational. |
 
 **Example `PaymentRequirements`:**
 
@@ -85,7 +85,7 @@ and returns it base64-encoded in the `X-PAYMENT-REQUIRED` header alongside the 4
   "description": "7-day API subscription",
   "extra": {
     "chap": "a3f82c...d94e01",
-    "risk": 0.10,
+    "risk": 10,
     "expected": "4500000"
   }
 }
@@ -94,7 +94,7 @@ and returns it base64-encoded in the `X-PAYMENT-REQUIRED` header alongside the 4
 `amount` is denominated in EMC satoshi (1 EMC = 100000000 satoshi, 8 decimal places).
 The `amount` field represents the ticket price — the actual EMC value broadcast when a
 winning ticket settles. The `expected` field represents the expected value per call:
-`amount × (1 - risk)`.
+`amount × (1 - 1/risk)`.
 
 ---
 
@@ -196,14 +196,14 @@ base64-encoded `SettlementResponse`:
 
 ## Risk Parameter Guidelines
 
-`risk` is set by the server operator at CHAP generation time. It MUST be in range (0, 1).
+`risk` is set by the server operator at CHAP generation time. It MUST be an integer ≥ 2.
 
 | Scenario | Recommended `risk` | Rationale |
 |---|---|---|
-| Per-request micro-billing, high frequency | 0.01 – 0.05 | 1 tx per 20–100 calls; block space efficient |
-| 7-day subscription gate | 0.10 | Short commitment; client retry cost is negligible |
-| 30-day subscription gate | 0.03 | Larger value; tighter expected-value guarantee |
-| Near-deterministic single request | 0.01 | Approaches `exact` behavior |
+| Per-request micro-billing, high frequency | 20 – 100 | 1 tx per 20–100 calls; block space efficient |
+| 7-day subscription gate | 10 | Short commitment; client retry cost is negligible |
+| 30-day subscription gate | 33 | Larger value; tighter expected-value guarantee |
+| Near-deterministic single request | 100 | Approaches `exact` behavior |
 
 Higher `risk` → fewer on-chain transactions → lower amortized fee per call.  
 Lower `risk` → tighter expected-value guarantee → appropriate for larger per-ticket amounts.

@@ -108,7 +108,11 @@ const PLANS = {
   '7d': {
     label:   '7-day',
     days:    7,
+<<<<<<< HEAD
     amount:  parseFloat(process.env.PRICE_7D  || '0.5000000'),
+=======
+    amount:  parseFloat(process.env.PRICE_7D  || '0.05000000'),
+>>>>>>> 9559279848535df48921b781e61640681be24abd
     risk:    parseFloat(process.env.RISK_7D   || '10'),
     timeout: parseInt(process.env.TIMEOUT_7D  || '300'),
     ttl_ms:  7 * 24 * 60 * 60 * 1000,
