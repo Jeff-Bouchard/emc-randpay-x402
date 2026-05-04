@@ -23,11 +23,11 @@ This repository:
 
 ## Why probabilistic settlement matters
 
-`exact` (the only scheme x402 ships with today) requires one on-chain transaction per paid request. `randpay` settles probabilistically: at `risk=0.01`, **100 API calls produce one on-chain transaction** with mathematically identical expected revenue. No confirmation wait. No facilitator. No smart contracts. `emercoind` is the facilitator.
+`exact` (the only scheme x402 ships with today) requires one on-chain transaction per paid request. `randpay` settles probabilistically: at `risk=100`, **100 API calls produce one on-chain transaction** with mathematically identical expected revenue. No confirmation wait. No facilitator. No smart contracts. `emercoind` is the facilitator.
 
 | | `exact` (EVM) | `randpay` (EMC) |
 |---|---|---|
-| On-chain txs per request | 1 | `risk` (fractional) |
+| On-chain txs per request | 1 | `1/risk` (fractional) |
 | Confirmation wait on response path | yes | no |
 | Third-party facilitator | required | not required |
 | Smart contracts | Permit2 / EIP-3009 / ERC-7710 | none |

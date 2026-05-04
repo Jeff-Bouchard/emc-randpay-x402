@@ -5,8 +5,8 @@
 The `randpay` scheme implements probabilistic micropayment settlement natively at the
 protocol layer of the Emercoin blockchain. Unlike deterministic schemes (e.g., `exact`)
 where every request results in exactly one on-chain transaction, `randpay` settles
-payment probabilistically: a given payment attempt succeeds with probability `(1 - risk)`,
-where `risk` is a server-configured parameter. The expected value of payment per request
+payment probabilistically: a given payment attempt succeeds with probability `1 - (1/risk)`,
+where `risk` is a server-configured parameter expressed as "1 in N" (e.g., risk=10 means 1 in 10 chance of non-collection). The expected value of payment per request
 is identical to a deterministic scheme at the same price — the distribution of settlement
 events is what differs.
 
@@ -16,17 +16,17 @@ presented here to register prior art and extend x402 interoperability to the Eme
 
 ## Use Cases
 
-**High-frequency micro-API billing.** At `risk=0.01`, 100 requests settle as one on-chain
+**High-frequency micro-API billing.** At `risk=100`, 100 requests settle as one on-chain
 transaction on average. Block space consumption and per-tx fee overhead are reduced by
-the inverse of `risk` while expected revenue is preserved exactly.
+`risk` while expected revenue is preserved exactly.
 
 **Inference-as-a-service.** LLM inference endpoints can gate per-call or per-token billing
 without incurring a confirmation-wait on every request. Non-winning tickets receive a fresh
 CHAP embedded in the 402 response and retry immediately — the confirmation-wait is amortized
 across the full population of callers.
 
-**Subscription tiers.** Higher-value subscriptions (e.g., 30-day) use lower `risk` values
-(tighter guarantee); lower-value subscriptions (e.g., 7-day) tolerate higher `risk`
+**Subscription tiers.** Higher-value subscriptions (e.g., 30-day) use higher `risk` values
+(tighter guarantee); lower-value subscriptions (e.g., 7-day) tolerate lower `risk`
 (cheaper retry cost to client). The server operator tunes the expected value guarantee
 to the commitment being purchased.
 
@@ -52,9 +52,9 @@ broadcasts a winning transaction.
 ability to censor settlement. The server cannot selectively reject winning tickets — the
 outcome is determined by `emercoind` internals at CHAP generation time.
 
-**Expected value preservation.** For any sequence of N requests at `risk` r and ticket
-price p, the expected total settlement is `N × p × (1 - r)`. This is mathematically
-equivalent to N deterministic payments of `p × (1 - r)`. The probabilistic model is a
+**Expected value preservation.** For any sequence of N requests at `risk` r (1 in N chance of non-collection) and ticket
+price p, the expected total settlement is `N × p × (1 - 1/r)`. This is mathematically
+equivalent to N deterministic payments of `p × (1 - 1/r)`. The probabilistic model is a
 statistical equivalence, not a discount or a gamble.
 
 ## Appendix

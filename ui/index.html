@@ -279,7 +279,7 @@ footer a:hover{color:var(--teal)}
   <h1>Pay once.<br><em>Settle rarely.</em><br>Same value.</h1>
   <p class="hero-sub">
     <strong>randpay</strong> is a probabilistic payment scheme for Emercoin, proposed for
-    registration in the x402 foundation. At <strong>risk=0.01</strong>, 100 API calls
+    registration in the x402 foundation. At <strong>risk=100</strong>, 100 API calls
     produce one on-chain transaction — with mathematically identical expected revenue.
     No smart contracts. No gas token. No facilitator. <strong>emercoind is the facilitator.</strong>
   </p>
@@ -489,7 +489,7 @@ footer a:hover{color:var(--teal)}
       <div class="plan-price">0.05 <span style="font-size:16px;font-weight:400">EMC</span></div>
       <div class="plan-price-sub">per subscription period</div>
       <div class="plan-rows">
-        <div class="plan-row"><span class="plan-row-k">risk</span><span class="plan-row-v teal">0.10</span></div>
+        <div class="plan-row"><span class="plan-row-k">risk</span><span class="plan-row-v teal">10</span></div>
         <div class="plan-row"><span class="plan-row-k">expected value</span><span class="plan-row-v">0.04500000 EMC</span></div>
         <div class="plan-row"><span class="plan-row-k">avg attempts to win</span><span class="plan-row-v">~1.11</span></div>
         <div class="plan-row"><span class="plan-row-k">chap timeout</span><span class="plan-row-v">300s</span></div>
@@ -502,8 +502,8 @@ footer a:hover{color:var(--teal)}
       <div class="plan-price">0.15 <span style="font-size:16px;font-weight:400">EMC</span></div>
       <div class="plan-price-sub">per subscription period</div>
       <div class="plan-rows">
-        <div class="plan-row"><span class="plan-row-k">risk</span><span class="plan-row-v teal">0.03</span></div>
-        <div class="plan-row"><span class="plan-row-k">expected value</span><span class="plan-row-v">0.14550000 EMC</span></div>
+        <div class="plan-row"><span class="plan-row-k">risk</span><span class="plan-row-v teal">33</span></div>
+        <div class="plan-row"><span class="plan-row-k">expected value</span><span class="plan-row-v">0.14545455 EMC</span></div>
         <div class="plan-row"><span class="plan-row-k">avg attempts to win</span><span class="plan-row-v">~1.03</span></div>
         <div class="plan-row"><span class="plan-row-k">chap timeout</span><span class="plan-row-v">300s</span></div>
         <div class="plan-row"><span class="plan-row-k">access duration</span><span class="plan-row-v">30 days</span></div>
@@ -512,9 +512,9 @@ footer a:hover{color:var(--teal)}
   </div>
   <div style="font-size:11px;color:var(--text3);line-height:1.8;padding:16px 24px;background:var(--bg2);border:1px solid var(--border)">
     <strong style="color:var(--text2)">Risk rationale:</strong>
-    7-day uses risk=0.10 — short commitment, client retry cost is trivial, 10% miss rate acceptable.
-    30-day uses risk=0.03 — larger value at stake; at risk=0.10 a client could grind ~10 CHAPs before winning, effectively a discount attack at 30-day prices.
-    At risk=0.03, expected non-winning attempts before success is ~1.03 — not exploitable.
+    7-day uses risk=10 (1 in 10) — short commitment, client retry cost is trivial, 10% miss rate acceptable.
+    30-day uses risk=33 (1 in 33) — larger value at stake; at risk=10 a client could grind ~10 CHAPs before winning, effectively a discount attack at 30-day prices.
+    At risk=33, expected non-winning attempts before success is ~1.03 — not exploitable.
   </div>
 </section>
 
@@ -532,15 +532,15 @@ footer a:hover{color:var(--teal)}
       <th>exact (EVM)</th>
     </tr></thead>
     <tbody>
-      <tr><td>on-chain txs per request</td><td class="hi">risk × N  (fractional)</td><td>1 per request</td></tr>
+      <tr><td>on-chain txs per request</td><td class="hi">1/risk × N  (fractional)</td><td>1 per request</td></tr>
       <tr><td>confirmation wait</td><td class="hi">none — probabilistic, async</td><td>1+ blocks on critical path</td></tr>
       <tr><td>facilitator required</td><td class="hi">no — emercoind is the facilitator</td><td>yes, third-party</td></tr>
       <tr><td>smart contracts</td><td class="hi">none</td><td>Permit2 / EIP-3009 / ERC-7710</td></tr>
       <tr><td>gas token</td><td class="hi">no gas — EMC is fee+payment</td><td>ETH for gas, token for payment</td></tr>
       <tr><td>client requirement</td><td>emercoind + funded EMC wallet</td><td>EVM wallet + token approval</td></tr>
       <tr><td>settlement model</td><td class="hi">probabilistic (fair by construction)</td><td>deterministic</td></tr>
-      <tr><td>fee per request</td><td class="hi">amortized across 1/risk requests</td><td>per-request</td></tr>
-      <tr><td>block space efficiency</td><td class="hi">1/risk × better</td><td>baseline</td></tr>
+      <tr><td>fee per request</td><td class="hi">amortized across risk requests</td><td>per-request</td></tr>
+      <tr><td>block space efficiency</td><td class="hi">risk × better</td><td>baseline</td></tr>
     </tbody>
   </table>
   </div>
@@ -558,8 +558,8 @@ footer a:hover{color:var(--teal)}
     <div class="scheme-cell"><div class="scheme-cell-label">amount</div><div class="scheme-cell-val"><code>"5000000"</code></div><div class="scheme-cell-sub">satoshi string, 8 decimals (= 0.05 EMC)</div></div>
     <div class="scheme-cell"><div class="scheme-cell-label">asset</div><div class="scheme-cell-val"><code>"EMC"</code></div><div class="scheme-cell-sub">native coin, no contract address</div></div>
     <div class="scheme-cell"><div class="scheme-cell-label">extra.chap</div><div class="scheme-cell-val"><code>"a3f82c…d94e01"</code></div><div class="scheme-cell-sub">hex from randpay_mkchap, single-use</div></div>
-    <div class="scheme-cell"><div class="scheme-cell-label">extra.risk</div><div class="scheme-cell-val"><code>0.10</code></div><div class="scheme-cell-sub">prob of non-collection per ticket</div></div>
-    <div class="scheme-cell"><div class="scheme-cell-label">extra.expected</div><div class="scheme-cell-val"><code>"4500000"</code></div><div class="scheme-cell-sub">floor(amount × (1−risk)), informational</div></div>
+    <div class="scheme-cell"><div class="scheme-cell-label">extra.risk</div><div class="scheme-cell-val"><code>10</code></div><div class="scheme-cell-sub">1 in N chance of non-collection per ticket</div></div>
+    <div class="scheme-cell"><div class="scheme-cell-label">extra.expected</div><div class="scheme-cell-val"><code>"4500000"</code></div><div class="scheme-cell-sub">floor(amount × (1−1/risk)), informational</div></div>
     <div class="scheme-cell"><div class="scheme-cell-label">maxTimeoutSeconds</div><div class="scheme-cell-val"><code>300</code></div><div class="scheme-cell-sub">must match randpay_mkchap timeout arg</div></div>
   </div>
 </section>
@@ -586,8 +586,8 @@ footer a:hover{color:var(--teal)}
 
 <script>
 const PLANS = {
-  '7d': {amount:'0.05000000',amtSat:'5000000',risk:.10,timeout:300,ttl:7},
-  '30d':{amount:'0.15000000',amtSat:'15000000',risk:.03,timeout:300,ttl:30}
+  '7d': {amount:'0.05000000',amtSat:'5000000',risk:10,timeout:300,ttl:7},
+  '30d':{amount:'0.15000000',amtSat:'15000000',risk:33,timeout:300,ttl:30}
 };
 let plan='7d', lastChap='', lastRawtx='', subTok='', activeTab='body';
 
@@ -791,15 +791,15 @@ function makeRisk(){
       <span>settlement frequency <span class="pg-field-type">how often a tx hits the chain</span></span>
     </div>
     <div id="riskChips" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
-      <button type="button" class="rchip" data-risk="0.50" onclick="pickRisk(this)" style="padding:10px 8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:11px;cursor:pointer;border-radius:2px;text-align:left;line-height:1.5;transition:all .15s">
+      <button type="button" class="rchip" data-risk="2" onclick="pickRisk(this)" style="padding:10px 8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:11px;cursor:pointer;border-radius:2px;text-align:left;line-height:1.5;transition:all .15s">
         <div style="font-weight:600;color:var(--text);margin-bottom:2px">⚡ Aggressive</div>
         <div style="font-size:10px;color:var(--text3)">1 in 2 calls</div>
       </button>
-      <button type="button" class="rchip" data-risk="0.10" onclick="pickRisk(this)" style="padding:10px 8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:11px;cursor:pointer;border-radius:2px;text-align:left;line-height:1.5;transition:all .15s">
+      <button type="button" class="rchip" data-risk="10" onclick="pickRisk(this)" style="padding:10px 8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:11px;cursor:pointer;border-radius:2px;text-align:left;line-height:1.5;transition:all .15s">
         <div style="font-weight:600;color:var(--text);margin-bottom:2px">⚖ Balanced</div>
         <div style="font-size:10px;color:var(--text3)">1 in 10 calls</div>
       </button>
-      <button type="button" class="rchip" data-risk="0.03" onclick="pickRisk(this)" style="padding:10px 8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:11px;cursor:pointer;border-radius:2px;text-align:left;line-height:1.5;transition:all .15s">
+      <button type="button" class="rchip" data-risk="33" onclick="pickRisk(this)" style="padding:10px 8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:11px;cursor:pointer;border-radius:2px;text-align:left;line-height:1.5;transition:all .15s">
         <div style="font-weight:600;color:var(--text);margin-bottom:2px">🛡 Efficient</div>
         <div style="font-size:10px;color:var(--text3)">1 in 33 calls</div>
       </button>
@@ -814,7 +814,7 @@ function makeRisk(){
     const chips=g.querySelectorAll('.rchip');
     let target=chips[1]; // default to Balanced
     chips.forEach(c=>{
-      if(Math.abs(parseFloat(c.dataset.risk)-r)<0.005) target=c;
+      if(parseFloat(c.dataset.risk)===r) target=c;
     });
     pickRisk(target);
   },0);
@@ -834,12 +834,12 @@ function pickRisk(btn){
   const r=parseFloat(btn.dataset.risk);
   document.getElementById('p_risk').value=r;
 
-  const oneIn=Math.round(1/r);
-  const pct=Math.round(r*100);
-  const ratio=Math.round(1/r);
+  const oneIn=r;
+  const pct=Math.round(100/r);
+  const ratio=r;
 
   document.getElementById('riskExplainText').innerHTML=
-    `<span style="color:var(--teal);font-weight:500">risk = ${r.toFixed(2)}</span> · roughly <span style="color:var(--teal)">1 in ${oneIn}</span> randpay tickets produces an on-chain tx. Expected payment per call is identical to deterministic schemes — you just batch settlement across <span style="color:var(--teal)">${ratio}× fewer txs</span>.`;
+    `<span style="color:var(--teal);font-weight:500">risk = ${r}</span> · roughly <span style="color:var(--teal)">1 in ${oneIn}</span> randpay tickets produces an on-chain tx (${pct}% win rate). Expected payment per call is identical to deterministic schemes — you just batch settlement across <span style="color:var(--teal)">${ratio}× fewer txs</span>.`;
 }
 
 function getRisk(){
@@ -848,7 +848,7 @@ function getRisk(){
     return parseFloat(el.value);
   }
   // Fallback if element doesn't exist or has no value
-  return PLANS[plan]?PLANS[plan].risk:0.1;
+  return PLANS[plan]?PLANS[plan].risk:10;
 }
 
 // ── CONSOLE ENGINE ──────────────────────────────────────────────
@@ -951,7 +951,7 @@ async function execute(){
       }
       if(!chap) chap=hex(64);
       lastChap=chap;
-      clog('send',`randpay_mkchap ${p.amount} ${getRisk().toFixed(2)} ${p.timeout}  <span class="di">→ ${isLive?'<span class="hi">LIVE server</span>':'sim'}</span>`,'rpc');
+      clog('send',`randpay_mkchap ${p.amount} ${getRisk()} ${p.timeout}  <span class="di">→ ${isLive?'<span class="hi">LIVE server</span>':'sim'}</span>`,'rpc');
       setResp(200,'RPC randpay_mkchap',chap,{'content-type':'application/json','x-emc-node':'emercoind/0.9.23',...(isLive?{'x-source':'live'}:{})},t);
       document.getElementById('respBody').innerHTML=`<span class="js">"${chap}"</span>`;
       setStep(1);
@@ -992,10 +992,10 @@ async function execute(){
         }
       }
       // Fallback: AUTHENTIC random based on actual risk value
-      // win probability = risk (matches "1 in N" framing where N=1/risk)
-      if(win===null) win = Math.random() < risk;
+      // win probability = 1 - 1/risk (where risk is "1 in N")
+      if(win===null) win = Math.random() < (1 - 1/risk);
 
-      clog('send',`randpay_accept "${(lastRawtx||'').slice(0,16)||'&lt;rawtx&gt;'}…"  <span class="di">→ ${isLive?'<span class="hi">LIVE</span>':'sim'} · win prob = ${risk.toFixed(2)}</span>`,'rpc');
+      clog('send',`randpay_accept "${(lastRawtx||'').slice(0,16)||'&lt;rawtx&gt;'}…"  <span class="di">→ ${isLive?'<span class="hi">LIVE</span>':'sim'} · win prob = ${(1 - 1/risk).toFixed(2)}</span>`,'rpc');
 
       if(win){
         csWins++;
@@ -1067,7 +1067,7 @@ async function runFullRound(){
   const liveModeEl=document.getElementById('liveMode');
   const live=liveModeEl?liveModeEl.checked:false;
   const risk=getRisk();
-  const expected=Math.round(1/risk*10)/10;
+  const expected=Math.round(risk/(risk-1)*10)/10;
 
   let attempt=0;
   const maxAttempts=Math.max(20, Math.ceil(expected*5)); // scale with risk
@@ -1078,7 +1078,7 @@ async function runFullRound(){
   // Reset visual sequence state
   resetSequence();
 
-  clog('info',`<span class="hi">── FULL ROUND</span>  plan=<span class="am">${plan}</span>  win prob=<span class="am">${risk.toFixed(2)}</span>  mode=<span class="hi">${live?'LIVE':'sim'}</span>  expected ~${expected} attempts`,'result');
+  clog('info',`<span class="hi">── FULL ROUND</span>  plan=<span class="am">${plan}</span>  win prob=<span class="am">${(1 - 1/risk).toFixed(2)}</span>  mode=<span class="hi">${live?'LIVE':'sim'}</span>  expected ~${expected} attempts`,'result');
 
   try {
     while(attempt < maxAttempts){
@@ -1141,8 +1141,8 @@ async function runFullRound(){
           }
         }
       }
-      // AUTHENTIC: win probability = configured risk value
-      if(win===null) win = Math.random() < risk;
+      // AUTHENTIC: win probability = 1 - 1/risk (where risk is "1 in N")
+      if(win===null) win = Math.random() < (1 - 1/risk);
 
       const dur=Date.now()-roundStart;
       roundMs.push(dur);
@@ -1182,7 +1182,7 @@ async function runFullRound(){
     }
 
     if(attempt>=maxAttempts && roundWins===0){
-      clog('err',`stopped after ${maxAttempts} attempts at win prob ${risk.toFixed(2)} — try a higher frequency preset`,'result');
+      clog('err',`stopped after ${maxAttempts} attempts at win prob ${(1 - 1/risk).toFixed(2)} — try a higher frequency preset`,'result');
       wizDone();
     }
 
@@ -1199,7 +1199,7 @@ async function runFullRound(){
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function(){
   // Update stat
-  document.getElementById('statTx').textContent=Math.round(PLANS[plan].risk*100)+'%';
+  document.getElementById('statTx').textContent=Math.round(100/PLANS[plan].risk)+'%';
   // Initialize the first command
   selectCmd('mkchap');
   resetSequence();
