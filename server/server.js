@@ -120,7 +120,7 @@ const PLANS = {
   '30d': {
     label:   '30-day',
     days:    30,
-    amount:  parseFloat(process.env.PRICE_30D || '0.15000000'),
+    amount:  parseFloat(process.env.PRICE_30D || '0.25000000'),
     risk:    parseFloat(process.env.RISK_30D  || '33'),
     timeout: parseInt(process.env.TIMEOUT_30D || '300'),
     ttl_ms:  30 * 24 * 60 * 60 * 1000,
